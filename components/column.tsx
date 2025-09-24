@@ -1,6 +1,6 @@
 'use client'
 
-import { Column as ColumnType } from '@/lib/types'
+import { Column as ColumnType, Card as CardType } from '@/lib/types'
 import { useDroppable } from '@dnd-kit/core'
 import { Card } from './card'
 import { MoreHorizontal, Plus, Calendar } from 'lucide-react'
@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils'
 interface ColumnProps {
   column: ColumnType
   onAddCard: (columnId: string) => void
+  onUpdateCard?: (cardId: string, updates: Partial<CardType>) => void
 }
 
-export function Column({ column, onAddCard }: ColumnProps) {
+export function Column({ column, onAddCard, onUpdateCard }: ColumnProps) {
   const { setNodeRef } = useDroppable({
     id: column.id,
   })
@@ -32,7 +33,7 @@ export function Column({ column, onAddCard }: ColumnProps) {
         className="flex-1 min-h-0 space-y-2"
       >
         {column.cards.map(card => (
-          <Card key={card.id} card={card} />
+          <Card key={card.id} card={card} onUpdateCard={onUpdateCard} />
         ))}
       </div>
 

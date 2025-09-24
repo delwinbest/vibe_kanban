@@ -259,6 +259,18 @@ export function Board() {
     }))
   }
 
+  function handleUpdateCard(cardId: string, updates: Partial<CardType>) {
+    setBoard(prevBoard => ({
+      ...prevBoard,
+      columns: prevBoard.columns.map(col => ({
+        ...col,
+        cards: col.cards.map(card => 
+          card.id === cardId ? { ...card, ...updates } : card
+        ),
+      })),
+    }))
+  }
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
@@ -283,6 +295,7 @@ export function Board() {
                   key={column.id}
                   column={column}
                   onAddCard={handleAddCard}
+                  onUpdateCard={handleUpdateCard}
                 />
               ))}
               
