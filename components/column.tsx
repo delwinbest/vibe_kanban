@@ -2,7 +2,6 @@
 
 import { Column as ColumnType } from '@/lib/types'
 import { useDroppable } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Card } from './card'
 import { MoreHorizontal, Plus, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -32,14 +31,9 @@ export function Column({ column, onAddCard }: ColumnProps) {
         ref={setNodeRef}
         className="flex-1 min-h-0 space-y-2"
       >
-        <SortableContext
-          items={column.cards.map(card => card.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {column.cards.map(card => (
-            <Card key={card.id} card={card} />
-          ))}
-        </SortableContext>
+        {column.cards.map(card => (
+          <Card key={card.id} card={card} />
+        ))}
       </div>
 
       {/* Add Card Button */}
