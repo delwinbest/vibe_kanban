@@ -43,8 +43,9 @@ store this PRD in a file called SPECIFICATION.md using markdown to improve readi
 ### TODO.md Creation
 based on this specification, create a todo list and store in a file called TODO.md
 
-### PROMPTS.md Creation
-create a file called PROMPTS.md and store all the promps I'm giving.
+## Project Kickstart Prompt Creation
+
+Take the first Setup task and transform it into a prompt that can be used to kickstart the project and create the initial design. Add a bit of context about the project we are trying to build.
 
 ---
 
