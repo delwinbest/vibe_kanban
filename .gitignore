@@ -85,3 +85,6 @@ public
 # Temporary folders
 tmp/
 temp/
+
+# MCP Creds
+.cursor/mcp.json
