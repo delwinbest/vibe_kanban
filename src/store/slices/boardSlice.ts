@@ -15,6 +15,14 @@ const initialState: BoardState = {
   error: null,
 };
 
+// Helper function to transform database response to frontend format
+const transformBoard = (dbBoard: any) => ({
+  id: dbBoard.id,
+  name: dbBoard.name,
+  createdAt: dbBoard.created_at,
+  updatedAt: dbBoard.updated_at,
+});
+
 // Async thunks
 export const fetchBoard = createAsyncThunk(
   'board/fetchBoard',
@@ -27,9 +35,11 @@ export const fetchBoard = createAsyncThunk(
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match frontend interface
+      return transformBoard(data);
     } catch (error) {
-      return handleSupabaseError(error);
+      throw new Error(handleSupabaseError(error).error);
     }
   }
 );
@@ -100,11 +110,7 @@ const boardSlice = createSlice({
       })
       .addCase(fetchBoard.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload && !action.payload.error) {
-          state.board = action.payload;
-        } else {
-          state.error = action.payload?.error || 'Failed to fetch board';
-        }
+        state.board = action.payload;
       })
       .addCase(fetchBoard.rejected, (state, action) => {
         state.loading = false;

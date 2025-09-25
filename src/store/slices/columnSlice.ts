@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Board, CreateColumnRequest, UpdateColumnRequest } from '../../types';
+import { Column, CreateColumnRequest, UpdateColumnRequest } from '../../types';
 import { supabase, TABLES, handleSupabaseError } from '../../services/supabase';
 
 // Initial state
@@ -15,6 +15,16 @@ const initialState: ColumnState = {
   error: null,
 };
 
+// Helper function to transform database response to frontend format
+const transformColumn = (dbColumn: any) => ({
+  id: dbColumn.id,
+  boardId: dbColumn.board_id,
+  name: dbColumn.name,
+  position: dbColumn.position,
+  createdAt: dbColumn.created_at,
+  updatedAt: dbColumn.updated_at,
+});
+
 // Async thunks
 export const fetchColumns = createAsyncThunk(
   'columns/fetchColumns',
@@ -27,9 +37,12 @@ export const fetchColumns = createAsyncThunk(
         .order('position');
 
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match frontend interface
+      const transformedData = data?.map(transformColumn) || [];
+      return transformedData;
     } catch (error) {
-      return handleSupabaseError(error);
+      throw new Error(handleSupabaseError(error).error);
     }
   }
 );
@@ -127,11 +140,7 @@ const columnSlice = createSlice({
       })
       .addCase(fetchColumns.fulfilled, (state, action) => {
         state.loading = false;
-        if (Array.isArray(action.payload)) {
-          state.columns = action.payload;
-        } else {
-          state.error = action.payload.error || 'Failed to fetch columns';
-        }
+        state.columns = action.payload;
       })
       .addCase(fetchColumns.rejected, (state, action) => {
         state.loading = false;
@@ -162,7 +171,7 @@ const columnSlice = createSlice({
       .addCase(updateColumn.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload && !action.payload.error) {
-          const index = state.columns.findIndex(col => col.id === action.payload.id);
+          const index = state.columns.findIndex((col: Column) => col.id === action.payload.id);
           if (index !== -1) {
             state.columns[index] = action.payload;
           }
@@ -181,7 +190,7 @@ const columnSlice = createSlice({
       })
       .addCase(deleteColumn.fulfilled, (state, action) => {
         state.loading = false;
-        state.columns = state.columns.filter(col => col.id !== action.payload);
+        state.columns = state.columns.filter((col: Column) => col.id !== action.payload);
       })
       .addCase(deleteColumn.rejected, (state, action) => {
         state.loading = false;

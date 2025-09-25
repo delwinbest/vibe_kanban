@@ -1,8 +1,11 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
+import { fetchBoard } from './store/slices/boardSlice';
+import { fetchColumns } from './store/slices/columnSlice';
+import { fetchCards } from './store/slices/cardSlice';
 import Header from './components/ui/Header';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -19,6 +22,18 @@ function App() {
     error: state.board.error || state.columns.error || state.cards.error,
   }));
 
+  // Debug logging
+  console.log('App state:', { board, columns, cards, loading, error });
+
+  // Fetch initial data
+  useEffect(() => {
+    // Fetch the default board (you can change this ID as needed)
+    const boardId = '550e8400-e29b-41d4-a716-446655440000';
+    dispatch(fetchBoard(boardId));
+    dispatch(fetchColumns(boardId));
+    dispatch(fetchCards(boardId));
+  }, [dispatch]);
+
   const handleDragStart = (event: DragStartEvent) => {
     dispatch(startDrag(event.active.id as string));
   };
@@ -28,7 +43,7 @@ function App() {
     dispatch(setDragOverColumn(over?.id as string || null));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = (_event: DragEndEvent) => {
     dispatch(endDrag());
     // TODO: Implement drag end logic for moving cards/columns
   };

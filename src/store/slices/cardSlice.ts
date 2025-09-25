@@ -15,6 +15,19 @@ const initialState: CardState = {
   error: null,
 };
 
+// Helper function to transform database response to frontend format
+const transformCard = (dbCard: any) => ({
+  id: dbCard.id,
+  columnId: dbCard.column_id,
+  title: dbCard.title,
+  description: dbCard.description,
+  dueDate: dbCard.due_date,
+  priority: dbCard.priority,
+  position: dbCard.position,
+  createdAt: dbCard.created_at,
+  updatedAt: dbCard.updated_at,
+});
+
 // Async thunks
 export const fetchCards = createAsyncThunk(
   'cards/fetchCards',
@@ -30,9 +43,12 @@ export const fetchCards = createAsyncThunk(
         .order('position');
 
       if (error) throw error;
-      return data;
+      
+      // Transform the data to match frontend interface
+      const transformedData = data?.map(transformCard) || [];
+      return transformedData;
     } catch (error) {
-      return handleSupabaseError(error);
+      throw new Error(handleSupabaseError(error).error);
     }
   }
 );
@@ -171,11 +187,7 @@ const cardSlice = createSlice({
       })
       .addCase(fetchCards.fulfilled, (state, action) => {
         state.loading = false;
-        if (Array.isArray(action.payload)) {
-          state.cards = action.payload;
-        } else {
-          state.error = action.payload.error || 'Failed to fetch cards';
-        }
+        state.cards = action.payload;
       })
       .addCase(fetchCards.rejected, (state, action) => {
         state.loading = false;
