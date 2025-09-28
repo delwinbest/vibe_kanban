@@ -1,6 +1,15 @@
+---
+description: GitHub Operations and Development Workflow
+globs:
+alwaysApply: true
+---
+
 # GitHub Operations and Development Workflow
 
 ## Git Branching Strategy
+
+### General Git Branching Management
+- Always ensure local respoitories are up to date before making changes to local branches. 
 
 ### Branch Structure
 - **`main`**: Production branch - only for stable, tested code
@@ -68,6 +77,12 @@
 6. **Create PR from `development` to `main`** for production deployment
 
 ## GitHub Issue Management
+
+### General Issue and Bug Management
+- If the user identifies an issue and asks you to root cause or fix. Determine if this is a net near feature or bug withing exsting code. 
+- Fixing tests and build failures are not considered bug. 
+- If the issue is indeed a bug, roor cause the problem and based on this, create a GitHub issue. 
+- Associate all fixes, branches and pull requests for this bug with the related GitHub Issue.
 
 ### Issue Creation
 - **Use clear, descriptive titles**
