@@ -137,6 +137,8 @@ export interface ColumnProps {
   onAddCard: (columnId: string) => void;
   onEditColumn: (column: Column) => void;
   onDeleteColumn: (columnId: string) => void;
+  onEditCard?: (card: Card) => void;
+  onDeleteCard?: (cardId: string) => void;
   onMoveCard: (cardId: string, newColumnId: string, newPosition: number) => void;
 }
 

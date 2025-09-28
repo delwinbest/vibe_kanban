@@ -5,15 +5,19 @@ import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns, reorderColumns } from './store/slices/columnSlice';
-import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn } from './store/slices/cardSlice';
+import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
-import { ModalProvider } from './components/ui/ModalProvider';
+import { ModalProvider, useModal } from './components/ui/ModalProvider';
+import CardCreateModal from './components/card/CardCreateModal';
+import CardDeleteModal from './components/card/CardDeleteModal';
+import { debugLog } from './utils/debug';
 import './styles/globals.css';
 
-function App() {
+function AppContent() {
   const dispatch = useAppDispatch();
+  const { openModal } = useModal();
   
   // Board ID - you can change this as needed
   const boardId = '550e8400-e29b-41d4-a716-446655440000';
@@ -37,7 +41,17 @@ function App() {
   }, [dispatch, boardId]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    dispatch(startDrag(event.active.id as string));
+    const activeId = event.active.id as string;
+    const activeCard = cards.find(card => card.id === activeId);
+    const activeColumn = columns.find(column => column.id === activeId);
+    
+    if (activeCard) {
+      debugLog.drag.start(activeId, 'card');
+    } else if (activeColumn) {
+      debugLog.drag.start(activeId, 'column');
+    }
+    
+    dispatch(startDrag(activeId));
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -74,6 +88,7 @@ function App() {
           const newPosition = columnCards.length - 1; // Move to end
           
           if (activeIndex !== newPosition) {
+            debugLog.card.reorder(activeCard.id, overColumn.id, activeIndex, newPosition);
             dispatch(reorderCardsInColumn({
               columnId: overColumn.id,
               fromIndex: activeIndex,
@@ -83,6 +98,7 @@ function App() {
         } else {
           // Different column - move between columns
           const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
+          debugLog.card.move(activeCard.id, activeCard.column_id, overColumn.id, newPosition);
           dispatch(moveCardBetweenColumns({
             cardId: activeCard.id,
             newColumnId: overColumn.id,
@@ -99,6 +115,7 @@ function App() {
           // Same column - reorder within column
           const activeIndex = targetColumnCards.findIndex(card => card.id === activeCard.id);
           if (activeIndex !== targetPosition) {
+            debugLog.card.reorder(activeCard.id, targetColumnId, activeIndex, targetPosition);
             dispatch(reorderCardsInColumn({
               columnId: targetColumnId,
               fromIndex: activeIndex,
@@ -107,6 +124,7 @@ function App() {
           }
         } else {
           // Different column - move between columns
+          debugLog.card.move(activeCard.id, activeCard.column_id, targetColumnId, targetPosition);
           dispatch(moveCardBetweenColumns({
             cardId: activeCard.id,
             newColumnId: targetColumnId,
@@ -137,6 +155,49 @@ function App() {
     dispatch(endDrag());
   };
 
+  const handleAddCard = (columnId: string) => {
+    const column = columns.find(col => col.id === columnId);
+    if (column) {
+      debugLog.modal.open('create-card', { columnId, columnName: column.name });
+      openModal(
+        <CardCreateModal columnId={columnId} columnName={column.name} />,
+        { title: 'Create New Card', size: 'md' }
+      );
+    }
+  };
+
+  const handleEditCard = (card: any) => {
+    debugLog.card.edit(card.id, {
+      title: card.title,
+      description: card.description,
+      due_date: card.due_date,
+      priority: card.priority,
+      status: card.status
+    });
+    dispatch(updateCard({
+      id: card.id,
+      title: card.title,
+      description: card.description,
+      due_date: card.due_date,
+      priority: card.priority,
+      status: card.status,
+      column_id: card.column_id,
+      position: card.position,
+      assignee_id: card.assignee_id,
+    }));
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    const card = cards.find(c => c.id === cardId);
+    if (card) {
+      debugLog.modal.open('delete-card', { cardId, cardTitle: card.title });
+      openModal(
+        <CardDeleteModal cardId={cardId} cardTitle={card.title} />,
+        { title: 'Delete Card', size: 'sm' }
+      );
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -153,27 +214,33 @@ function App() {
   }
 
   return (
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <Board 
+        board={board}
+        columns={columns}
+        cards={cards}
+        onAddColumn={() => console.log('Add column')}
+        onEditColumn={(column) => console.log('Edit column:', column)}
+        onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
+        onAddCard={handleAddCard}
+            onEditCard={handleEditCard}
+        onDeleteCard={handleDeleteCard}
+        onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
+        onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
+      />
+    </DndContext>
+  );
+}
+
+function App() {
+  return (
     <ErrorBoundary>
       <ModalProvider>
-        <DndContext
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <Board 
-            board={board}
-            columns={columns}
-            cards={cards}
-            onAddColumn={() => console.log('Add column')}
-            onEditColumn={(column) => console.log('Edit column:', column)}
-            onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
-            onAddCard={(columnId) => console.log('Add card to column:', columnId)}
-            onEditCard={(card) => console.log('Edit card:', card)}
-            onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
-            onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
-            onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
-          />
-        </DndContext>
+        <AppContent />
       </ModalProvider>
     </ErrorBoundary>
   );
