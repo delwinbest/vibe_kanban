@@ -3,6 +3,7 @@ import { useAppDispatch } from '../../hooks/redux';
 import { createCard } from '../../store/slices/cardSlice';
 import { useModal } from '../ui/ModalProvider';
 import { Priority, Status } from '../../types';
+import { debugLog } from '../../utils/debug';
 
 interface CardCreateModalProps {
   columnId: string;
@@ -36,17 +37,23 @@ const CardCreateModal: React.FC<CardCreateModalProps> = ({ columnId, columnName 
     setError(null);
 
     try {
-      await dispatch(createCard({
+      const cardData = {
         column_id: columnId,
         title: formData.title.trim(),
         description: formData.description.trim() || undefined,
         due_date: formData.due_date || undefined,
         priority: formData.priority,
         status: formData.status,
-      })).unwrap();
+      };
+      
+      debugLog.api.request('createCard', cardData);
+      const result = await dispatch(createCard(cardData)).unwrap();
+      debugLog.api.success('createCard', result);
+      debugLog.card.create(result);
       
       closeModal();
     } catch (err) {
+      debugLog.api.error('createCard', err);
       setError(err instanceof Error ? err.message : 'Failed to create card');
     } finally {
       setIsSubmitting(false);

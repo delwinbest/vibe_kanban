@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ui/ErrorBoundary';
 import { ModalProvider, useModal } from './components/ui/ModalProvider';
 import CardCreateModal from './components/card/CardCreateModal';
 import CardDeleteModal from './components/card/CardDeleteModal';
+import { debugLog } from './utils/debug';
 import './styles/globals.css';
 
 function AppContent() {
@@ -40,7 +41,17 @@ function AppContent() {
   }, [dispatch, boardId]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    dispatch(startDrag(event.active.id as string));
+    const activeId = event.active.id as string;
+    const activeCard = cards.find(card => card.id === activeId);
+    const activeColumn = columns.find(column => column.id === activeId);
+    
+    if (activeCard) {
+      debugLog.drag.start(activeId, 'card');
+    } else if (activeColumn) {
+      debugLog.drag.start(activeId, 'column');
+    }
+    
+    dispatch(startDrag(activeId));
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -77,6 +88,7 @@ function AppContent() {
           const newPosition = columnCards.length - 1; // Move to end
           
           if (activeIndex !== newPosition) {
+            debugLog.card.reorder(activeCard.id, overColumn.id, activeIndex, newPosition);
             dispatch(reorderCardsInColumn({
               columnId: overColumn.id,
               fromIndex: activeIndex,
@@ -86,6 +98,7 @@ function AppContent() {
         } else {
           // Different column - move between columns
           const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
+          debugLog.card.move(activeCard.id, activeCard.column_id, overColumn.id, newPosition);
           dispatch(moveCardBetweenColumns({
             cardId: activeCard.id,
             newColumnId: overColumn.id,
@@ -102,6 +115,7 @@ function AppContent() {
           // Same column - reorder within column
           const activeIndex = targetColumnCards.findIndex(card => card.id === activeCard.id);
           if (activeIndex !== targetPosition) {
+            debugLog.card.reorder(activeCard.id, targetColumnId, activeIndex, targetPosition);
             dispatch(reorderCardsInColumn({
               columnId: targetColumnId,
               fromIndex: activeIndex,
@@ -110,6 +124,7 @@ function AppContent() {
           }
         } else {
           // Different column - move between columns
+          debugLog.card.move(activeCard.id, activeCard.column_id, targetColumnId, targetPosition);
           dispatch(moveCardBetweenColumns({
             cardId: activeCard.id,
             newColumnId: targetColumnId,
@@ -143,6 +158,7 @@ function AppContent() {
   const handleAddCard = (columnId: string) => {
     const column = columns.find(col => col.id === columnId);
     if (column) {
+      debugLog.modal.open('create-card', { columnId, columnName: column.name });
       openModal(
         <CardCreateModal columnId={columnId} columnName={column.name} />,
         { title: 'Create New Card', size: 'md' }
@@ -151,6 +167,13 @@ function AppContent() {
   };
 
   const handleEditCard = (card: any) => {
+    debugLog.card.edit(card.id, {
+      title: card.title,
+      description: card.description,
+      due_date: card.due_date,
+      priority: card.priority,
+      status: card.status
+    });
     dispatch(updateCard({
       id: card.id,
       title: card.title,
@@ -167,6 +190,7 @@ function AppContent() {
   const handleDeleteCard = (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (card) {
+      debugLog.modal.open('delete-card', { cardId, cardTitle: card.title });
       openModal(
         <CardDeleteModal cardId={cardId} cardTitle={card.title} />,
         { title: 'Delete Card', size: 'sm' }

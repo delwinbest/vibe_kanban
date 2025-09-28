@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppDispatch } from '../../hooks/redux';
 import { deleteCard } from '../../store/slices/cardSlice';
 import { useModal } from '../ui/ModalProvider';
+import { debugLog } from '../../utils/debug';
 
 interface CardDeleteModalProps {
   cardId: string;
@@ -14,9 +15,13 @@ const CardDeleteModal: React.FC<CardDeleteModalProps> = ({ cardId, cardTitle }) 
 
   const handleDelete = async () => {
     try {
-      await dispatch(deleteCard(cardId)).unwrap();
+      debugLog.api.request('deleteCard', { cardId });
+      const result = await dispatch(deleteCard(cardId)).unwrap();
+      debugLog.api.success('deleteCard', result);
+      debugLog.card.delete(cardId, cardTitle);
       closeModal();
     } catch (error) {
+      debugLog.api.error('deleteCard', error);
       console.error('Failed to delete card:', error);
       // Error handling could be improved with a toast notification
     }
