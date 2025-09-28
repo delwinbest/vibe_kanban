@@ -124,14 +124,14 @@
 - [ ] Add column card count display
 - [ ] Handle column deletion with card cleanup
 
-### Phase 8: Labels and Tags System ✅ COMPLETED
-- [x] Create label management system
-- [x] Implement label creation and editing
-- [x] Add color picker for labels
-- [x] Create label assignment to cards
-- [x] Implement label filtering
-- [x] Add label-based card grouping
-- [x] Create label statistics/analytics
+### Phase 8: Labels and Tags System
+- [ ] Create label management system
+- [ ] Implement label creation and editing
+- [ ] Add color picker for labels
+- [ ] Create label assignment to cards
+- [ ] Implement label filtering
+- [ ] Add label-based card grouping
+- [ ] Create label statistics/analytics
 
 ### Phase 9: Real-time Collaboration ✅ COMPLETED
 - [x] Set up Supabase real-time subscriptions ✅
