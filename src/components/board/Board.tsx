@@ -96,63 +96,64 @@ const Board: React.FC<BoardProps> = ({
   };
 
   return (
-    <div className="kanban-board min-h-screen bg-gray-50">
-      {/* Board Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">
-              {board.name}
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your tasks and projects efficiently
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">Public To All</span>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-            <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
-              Export Board
-            </button>
-            <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
-              Import Board
-            </button>
-            <button 
-              onClick={onAddColumn}
-              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Add Column
-            </button>
-            <button className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
-              Share
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* View Options */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
+    <div className="kanban-board min-h-screen">
+      {/* Combined Board Header */}
+      <div className="px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-1">
-            <button className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
-              List
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
-              Board
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
-              Timeline
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
-              Calendar
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
-              Progress
-            </button>
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-2xl border border-white/20 px-6 py-4">
+            {/* Top Section - Board Info and Actions */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  {board.name}
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Manage your tasks and projects efficiently
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Public To All</span>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
+                  Export Board
+                </button>
+                <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
+                  Import Board
+                </button>
+                <button 
+                  onClick={onAddColumn}
+                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Add Column
+                </button>
+                <button className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
+                  Share
+                </button>
+              </div>
+            </div>
+            
+            {/* Bottom Section - View Options */}
+            <div className="flex items-center gap-1">
+              <button className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
+                List
+              </button>
+              <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+                Board
+              </button>
+              <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+                Timeline
+              </button>
+              <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+                Calendar
+              </button>
+              <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+                Progress
+              </button>
+            </div>
           </div>
         </div>
       </div>

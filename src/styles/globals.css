@@ -38,31 +38,33 @@
 
 @layer components {
   .kanban-board {
-    @apply min-h-screen bg-gray-50;
+    @apply min-h-screen;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   
   .kanban-column {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 min-h-[600px] w-80 flex-shrink-0;
+    @apply bg-white/95 backdrop-blur-sm rounded-lg shadow-2xl border border-white/20 min-h-[600px] w-80 flex-shrink-0;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
   
   .kanban-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-gray-300;
+    @apply bg-white/90 backdrop-blur-sm rounded-lg shadow-md border border-white/30 p-4 mb-3 cursor-pointer hover:shadow-lg transition-all duration-200 hover:border-white/50 hover:bg-white/95;
   }
   
   .kanban-card:hover {
-    @apply border-gray-300 shadow-md;
+    @apply border-white/50 shadow-lg bg-white/95;
   }
   
   .kanban-card.dragging {
-    @apply opacity-50 rotate-1 scale-105 shadow-lg;
+    @apply opacity-60 rotate-1 scale-105 shadow-2xl bg-white/80;
   }
   
   .kanban-dropzone {
-    @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200;
+    @apply border-2 border-dashed border-white/40 rounded-lg p-6 text-center text-white/70 hover:border-white/60 hover:bg-white/10 transition-all duration-200;
   }
   
   .kanban-dropzone.drag-over {
-    @apply border-blue-400 bg-blue-50 text-blue-600;
+    @apply border-white/80 bg-white/20 text-white/90;
   }
   
   .priority-badge {
