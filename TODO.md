@@ -10,6 +10,7 @@
 - **Drag & Drop Infrastructure**: DndContext provider setup
 - **Modern UI Design**: Priority badges (P1, P2, P3), status indicators, and professional styling
 - **Consolidated Header**: Single header with Export, Import, Add Column, and Share functionality
+- **Branch Strategy**: Development branch created for ongoing work
 
 ### 🚧 In Progress
 - **Drag & Drop Logic**: Complete implementation needed
@@ -304,6 +305,18 @@
 - **Backend**: Supabase (PostgreSQL + Real-time + Auth)
 - **Database**: Complete schema with RLS policies and indexes
 
+### Git Branch Strategy
+- **`main`**: Production-ready code, stable releases
+- **`development`**: Integration branch for ongoing development (current branch)
+- **`feature/*`**: Feature branches for new functionality
+
+### Development Workflow
+1. All development work happens on `development` branch
+2. Create feature branches from `development` for new features
+3. Merge feature branches back to `development` after review
+4. Merge `development` to `main` for production releases
+5. Keep `main` branch stable and production-ready
+
 ### Key Files Structure
 ```
 src/
@@ -332,6 +345,7 @@ src/
 ---
 
 **Last Updated**: January 2025  
+**Current Branch**: `development`  
 **Estimated Total Development Time**: 8-12 weeks (reduced due to completed foundation)  
 **Team Size**: 1-2 developers  
 **Priority**: High (Core features) → Medium (Enhancements) → Low (Future features)
