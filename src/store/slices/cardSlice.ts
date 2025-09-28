@@ -24,10 +24,10 @@ const transformCard = (dbCard: any) => ({
   title: dbCard.title,
   description: dbCard.description,
   due_date: dbCard.due_date,
-  priority: dbCard.priority,
-  status: dbCard.status,
+  priority: (dbCard.priority === 'low' ? 'P3' : dbCard.priority === 'medium' ? 'P2' : dbCard.priority === 'high' ? 'P1' : 'P3') as 'P1' | 'P2' | 'P3',
+  status: 'not_started' as 'not_started' | 'started' | 'ongoing' | 'in_progress' | 'completed', // Default status since DB doesn't have this column
   position: dbCard.position,
-  assignee_id: dbCard.assignee_id,
+  assignee_id: undefined, // Not in current schema
   created_at: dbCard.created_at,
   updated_at: dbCard.updated_at,
 });
@@ -68,8 +68,7 @@ export const createCard = createAsyncThunk(
           title: request.title,
           description: request.description,
           due_date: request.due_date,
-          priority: request.priority || 'P3',
-          status: request.status || 'not_started',
+          priority: request.priority === 'P1' ? 'high' : request.priority === 'P2' ? 'medium' : 'low',
           position: 0, // Will be updated based on existing cards
         }])
         .select()
@@ -93,11 +92,9 @@ export const updateCard = createAsyncThunk(
           ...(request.title && { title: request.title }),
           ...(request.description !== undefined && { description: request.description }),
           ...(request.due_date !== undefined && { due_date: request.due_date }),
-          ...(request.priority && { priority: request.priority }),
-          ...(request.status && { status: request.status }),
+          ...(request.priority && { priority: request.priority === 'P1' ? 'high' : request.priority === 'P2' ? 'medium' : 'low' }),
           ...(request.column_id && { column_id: request.column_id }),
           ...(request.position !== undefined && { position: request.position }),
-          ...(request.assignee_id && { assignee_id: request.assignee_id }),
           updated_at: new Date().toISOString(),
         })
         .eq('id', request.id)
