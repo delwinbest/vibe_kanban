@@ -348,7 +348,7 @@ const cardSlice = createSlice({
         // Optimistically remove card immediately
         state.cards = state.cards.filter(card => card.id !== action.meta.arg);
       })
-      .addCase(deleteCard.fulfilled, (state, action) => {
+      .addCase(deleteCard.fulfilled, (_state, _action) => {
         // Card already removed optimistically, nothing to do
         // Real-time subscription will handle any cleanup if needed
       })
@@ -357,7 +357,7 @@ const cardSlice = createSlice({
         // TODO: Restore deleted card on error (would need to store it temporarily)
       })
       // Move card - optimistic update, no loading state
-      .addCase(moveCard.pending, (state, action) => {
+      .addCase(moveCard.pending, (state, _action) => {
         state.error = null;
         // Optimistic update already handled by drag & drop reducers
       })
