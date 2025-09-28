@@ -15,16 +15,16 @@
 - **Label System**: Complete label slice with CRUD operations and real-time subscriptions
 - **Selectors**: Comprehensive selectors for derived state and data transformation
 - **Optimistic Updates**: Implemented for better user experience
+- **Drag & Drop Logic**: Complete implementation for cards and columns with state management
 
 ### 🚧 In Progress
-- **Drag & Drop Logic**: Complete implementation needed
 - **CRUD Operations**: Create, update, delete cards and columns
 
 ### 🎯 Immediate Next Steps (Priority Order)
-1. **Complete Phase 5: Drag & Drop Logic** - Implement card movement between columns
-2. **Implement CRUD Operations** - Create, update, delete cards and columns
-3. **User Assignment** - Card assignee functionality
-4. **Advanced Features** - Due dates, attachments, comments
+1. **Implement CRUD Operations** - Create, update, delete cards and columns
+2. **User Assignment** - Card assignee functionality
+3. **Advanced Features** - Due dates, attachments, comments
+4. **Accessibility & Mobile** - Keyboard navigation and touch support
 
 ### ✅ Completed Components
 - **Card Component** (`src/components/card/Card.tsx`) - Individual card display with drag functionality ✅
@@ -33,7 +33,6 @@
 - **Board Component** - Updated to use new components ✅
 
 ### 🚨 Critical Missing Components
-- **Drag & Drop Logic** - Complete implementation for cards and columns
 - **CRUD Operations** - Complete API integration with error handling
 
 ---
@@ -90,13 +89,15 @@
 - [x] Add error handling in store
 - [x] Create selectors for derived state
 
-### Phase 5: Drag & Drop Implementation 🚧 IN PROGRESS
-- [x] Set up DndContext provider
-- [ ] Implement column drag and drop
-- [ ] Implement card drag and drop between columns
-- [ ] Implement card reordering within columns
-- [ ] Add visual feedback during drag operations
-- [ ] Handle drag end events and state updates
+### Phase 5: Drag & Drop Implementation ✅ COMPLETED
+- [x] Set up DndContext provider ✅
+- [x] Implement column drag and drop ✅
+- [x] Implement card drag and drop between columns ✅
+- [x] Implement card reordering within columns ✅
+- [x] Add visual feedback during drag operations ✅
+- [x] Handle drag end events and state updates ✅
+- [x] Fix drag state flickering bug ✅
+- [x] Make entire card draggable for better UX ✅
 - [ ] Implement keyboard navigation for accessibility
 - [ ] Add touch support for mobile devices
 - [ ] Optimize drag performance
