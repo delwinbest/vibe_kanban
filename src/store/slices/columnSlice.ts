@@ -161,11 +161,12 @@ const columnSlice = createSlice({
       columns.splice(toIndex, 0, movedColumn);
       
       // Update positions
-      columns.forEach((column, index) => {
-        column.position = index;
-      });
+      const updatedColumns = columns.map((column, index) => ({
+        ...column,
+        position: index
+      }));
       
-      state.columns = columns;
+      state.columns = updatedColumns;
     },
     addColumn: (state, action: PayloadAction<Column>) => {
       state.columns.push(action.payload);

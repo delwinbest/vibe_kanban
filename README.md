@@ -219,19 +219,20 @@ To test real-time functionality:
 ```
 src/
 ├── components/
-│   ├── ui/           # Reusable UI components
+│   ├── ui/           # Reusable UI components (Header, Modal, LoadingSpinner, ErrorBoundary)
 │   ├── board/        # Board-related components
-│   ├── column/       # Column components
-│   └── card/         # Card components
+│   ├── column/       # Column components ✅
+│   └── card/         # Card components ✅
 ├── store/
-│   ├── slices/       # Redux slices
+│   ├── slices/       # Redux slices (board, column, card, ui)
 │   └── index.ts      # Store configuration
 ├── services/
-│   └── supabase.ts   # Supabase client
+│   └── supabase.ts   # Supabase client with real-time subscriptions
 ├── types/
 │   └── index.ts      # TypeScript type definitions
 ├── hooks/
-│   └── redux.ts      # Custom Redux hooks
+│   ├── redux.ts      # Custom Redux hooks
+│   └── useRealtimeSubscriptions.ts # Real-time subscription hook
 ├── utils/
 │   └── index.ts      # Utility functions
 └── styles/
@@ -305,6 +306,9 @@ If you encounter any issues or have questions, please:
 ## Roadmap
 
 - [x] Real-time collaboration and live updates ✅
+- [x] Basic UI components (Card, Column, Modal) ✅
+- [ ] Drag & drop functionality
+- [ ] CRUD operations for cards and columns
 - [ ] Multiple board support
 - [ ] User authentication and authorization
 - [ ] Advanced filtering and search

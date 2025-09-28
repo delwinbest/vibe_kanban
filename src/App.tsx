@@ -11,6 +11,7 @@ import Header from './components/ui/Header';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import { ModalProvider } from './components/ui/ModalProvider';
 import './styles/globals.css';
 
 function App() {
@@ -68,24 +69,32 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="kanban-board min-h-screen">
-        <DndContext
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <Header board={board} />
-          <main className="container mx-auto px-4 py-8">
-            <SortableContext items={columns.map(col => col.id)} strategy={verticalListSortingStrategy}>
+      <ModalProvider>
+        <div className="kanban-board min-h-screen">
+          <DndContext
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <Header board={board} />
+            <main className="container mx-auto px-4 py-8">
               <Board 
                 board={board}
                 columns={columns}
                 cards={cards}
+                onAddColumn={() => console.log('Add column')}
+                onEditColumn={(column) => console.log('Edit column:', column)}
+                onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
+                onAddCard={(columnId) => console.log('Add card to column:', columnId)}
+                onEditCard={(card) => console.log('Edit card:', card)}
+                onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
+                onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
+                onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
               />
-            </SortableContext>
-          </main>
-        </DndContext>
-      </div>
+            </main>
+          </DndContext>
+        </div>
+      </ModalProvider>
     </ErrorBoundary>
   );
 }

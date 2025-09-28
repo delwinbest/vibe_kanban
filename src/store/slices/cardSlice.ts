@@ -192,26 +192,30 @@ const cardSlice = createSlice({
     },
     reorderCardsInColumn: (state, action: PayloadAction<{ columnId: string; fromIndex: number; toIndex: number }>) => {
       const { columnId, fromIndex, toIndex } = action.payload;
-      const columnCards = state.cards.filter(card => card.columnId === columnId);
+      const columnCards = [...state.cards.filter(card => card.columnId === columnId)];
       const otherCards = state.cards.filter(card => card.columnId !== columnId);
       
       const [movedCard] = columnCards.splice(fromIndex, 1);
       columnCards.splice(toIndex, 0, movedCard);
       
       // Update positions
-      columnCards.forEach((card, index) => {
-        card.position = index;
-      });
+      const updatedColumnCards = columnCards.map((card, index) => ({
+        ...card,
+        position: index
+      }));
       
-      state.cards = [...otherCards, ...columnCards];
+      state.cards = [...otherCards, ...updatedColumnCards];
     },
     moveCardBetweenColumns: (state, action: PayloadAction<{ cardId: string; newColumnId: string; newPosition: number }>) => {
       const { cardId, newColumnId, newPosition } = action.payload;
       const cardIndex = state.cards.findIndex(card => card.id === cardId);
       
       if (cardIndex !== -1) {
-        state.cards[cardIndex].columnId = newColumnId;
-        state.cards[cardIndex].position = newPosition;
+        state.cards[cardIndex] = {
+          ...state.cards[cardIndex],
+          columnId: newColumnId,
+          position: newPosition
+        };
       }
     },
     addCard: (state, action: PayloadAction<Card>) => {
