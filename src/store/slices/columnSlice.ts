@@ -111,6 +111,28 @@ export const deleteColumn = createAsyncThunk(
   }
 );
 
+export const reorderColumnsInDatabase = createAsyncThunk(
+  'columns/reorderColumnsInDatabase',
+  async (columns: Column[]) => {
+    try {
+      const updates = columns.map((column, index) => ({
+        id: column.id,
+        position: index,
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from(TABLES.COLUMNS)
+        .upsert(updates, { onConflict: 'id' });
+
+      if (error) throw error;
+      return columns;
+    } catch (error) {
+      return handleSupabaseError(error);
+    }
+  }
+);
+
 // Real-time subscription actions
 export const subscribeToColumnChanges = createAsyncThunk(
   'columns/subscribeToColumnChanges',
@@ -260,6 +282,23 @@ const columnSlice = createSlice({
       // Unsubscribe from column changes
       .addCase(unsubscribeFromColumnChanges.fulfilled, (state) => {
         state.isSubscribed = false;
+      })
+      // Reorder columns in database
+      .addCase(reorderColumnsInDatabase.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(reorderColumnsInDatabase.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload && !action.payload.error) {
+          state.columns = action.payload;
+        } else {
+          state.error = action.payload?.error || 'Failed to reorder columns';
+        }
+      })
+      .addCase(reorderColumnsInDatabase.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to reorder columns';
       });
   },
 });

@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
-import { fetchColumns, reorderColumns } from './store/slices/columnSlice';
+import { fetchColumns, reorderColumns, reorderColumnsInDatabase, createColumn, updateColumn, deleteColumn } from './store/slices/columnSlice';
 import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -12,6 +12,9 @@ import ErrorBoundary from './components/ui/ErrorBoundary';
 import { ModalProvider, useModal } from './components/ui/ModalProvider';
 import CardCreateModal from './components/card/CardCreateModal';
 import CardDeleteModal from './components/card/CardDeleteModal';
+import ColumnCreateModal from './components/column/ColumnCreateModal';
+import ColumnEditModal from './components/column/ColumnEditModal';
+import ColumnDeleteModal from './components/column/ColumnDeleteModal';
 import { debugLog } from './utils/debug';
 import './styles/globals.css';
 
@@ -147,11 +150,18 @@ function AppContent() {
         const [movedColumn] = newColumns.splice(activeIndex, 1);
         newColumns.splice(overIndex, 0, movedColumn);
         
-        // Update positions
+        // Update positions optimistically
         dispatch(reorderColumns({
           fromIndex: activeIndex,
           toIndex: overIndex
         }));
+
+        // Update positions in database
+        const reorderedColumns = newColumns.map((column, index) => ({
+          ...column,
+          position: index
+        }));
+        dispatch(reorderColumnsInDatabase(reorderedColumns));
       }
     }
 
@@ -201,6 +211,33 @@ function AppContent() {
     }
   };
 
+  const handleAddColumn = () => {
+    debugLog.modal.open('create-column', { boardId });
+    openModal(
+      <ColumnCreateModal boardId={boardId} onClose={() => {}} />,
+      { title: 'Create New Column', size: 'md' }
+    );
+  };
+
+  const handleEditColumn = (column: any) => {
+    debugLog.modal.open('edit-column', { columnId: column.id, columnName: column.name });
+    openModal(
+      <ColumnEditModal column={column} onClose={() => {}} />,
+      { title: 'Edit Column', size: 'md' }
+    );
+  };
+
+  const handleDeleteColumn = (columnId: string) => {
+    const column = columns.find(c => c.id === columnId);
+    if (column) {
+      debugLog.modal.open('delete-column', { columnId, columnName: column.name });
+      openModal(
+        <ColumnDeleteModal columnId={columnId} columnName={column.name} onClose={() => {}} />,
+        { title: 'Delete Column', size: 'md' }
+      );
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -226,9 +263,9 @@ function AppContent() {
         board={board}
         columns={columns}
         cards={cards}
-        onAddColumn={() => console.log('Add column')}
-        onEditColumn={(column) => console.log('Edit column:', column)}
-        onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
+        onAddColumn={handleAddColumn}
+        onEditColumn={handleEditColumn}
+        onDeleteColumn={handleDeleteColumn}
         onAddCard={handleAddCard}
             onEditCard={handleEditCard}
         onDeleteCard={handleDeleteCard}
