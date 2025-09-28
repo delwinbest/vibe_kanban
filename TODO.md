@@ -53,7 +53,7 @@
 - [x] Create database indexes for performance
 - [x] Set up Row Level Security (RLS) policies
 - [x] Create database functions for complex operations
-- [ ] Set up real-time subscriptions
+- [x] Set up real-time subscriptions ✅
 
 ## Core Application Development
 
@@ -122,7 +122,7 @@
 - [ ] Create label statistics/analytics
 
 ### Phase 9: Real-time Collaboration
-- [ ] Set up Supabase real-time subscriptions
+- [x] Set up Supabase real-time subscriptions ✅
 - [ ] Implement live updates for board changes
 - [ ] Add user presence indicators
 - [ ] Handle conflict resolution for simultaneous edits

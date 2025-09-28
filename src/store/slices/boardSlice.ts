@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Board } from '../../types';
-import { supabase, TABLES, handleSupabaseError } from '../../services/supabase';
+import { supabase, TABLES, handleSupabaseError, subscribeToBoards, subscriptionManager } from '../../services/supabase';
 
 // Initial state
 interface BoardState {
   board: Board | null;
   loading: boolean;
   error: string | null;
+  isSubscribed: boolean;
 }
 
 const initialState: BoardState = {
   board: null,
   loading: false,
   error: null,
+  isSubscribed: false,
 };
 
 // Helper function to transform database response to frontend format
@@ -86,6 +88,42 @@ export const updateBoard = createAsyncThunk(
   }
 );
 
+// Real-time subscription actions
+export const subscribeToBoardChanges = createAsyncThunk(
+  'board/subscribeToBoardChanges',
+  async (boardId: string, { dispatch }) => {
+    const subscription = subscribeToBoards((payload) => {
+      console.log('Board change received:', payload);
+      
+      switch (payload.eventType) {
+        case 'UPDATE':
+          if (payload.new.id === boardId) {
+            dispatch(setBoard(transformBoard(payload.new)));
+          }
+          break;
+        case 'DELETE':
+          if (payload.old.id === boardId) {
+            dispatch(clearBoard());
+          }
+          break;
+        default:
+          break;
+      }
+    });
+
+    subscriptionManager.subscribe(`board_${boardId}`, subscription);
+    return true;
+  }
+);
+
+export const unsubscribeFromBoardChanges = createAsyncThunk(
+  'board/unsubscribeFromBoardChanges',
+  async (boardId: string) => {
+    subscriptionManager.unsubscribe(`board_${boardId}`);
+    return true;
+  }
+);
+
 // Slice
 const boardSlice = createSlice({
   name: 'board',
@@ -99,6 +137,9 @@ const boardSlice = createSlice({
     },
     clearBoard: (state) => {
       state.board = null;
+    },
+    setSubscribed: (state, action: PayloadAction<boolean>) => {
+      state.isSubscribed = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -149,9 +190,21 @@ const boardSlice = createSlice({
       .addCase(updateBoard.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to update board';
+      })
+      // Subscribe to board changes
+      .addCase(subscribeToBoardChanges.fulfilled, (state) => {
+        state.isSubscribed = true;
+      })
+      .addCase(subscribeToBoardChanges.rejected, (state) => {
+        state.isSubscribed = false;
+        state.error = 'Failed to subscribe to board changes';
+      })
+      // Unsubscribe from board changes
+      .addCase(unsubscribeFromBoardChanges.fulfilled, (state) => {
+        state.isSubscribed = false;
       });
   },
 });
 
-export const { clearError, setBoard, clearBoard } = boardSlice.actions;
+export const { clearError, setBoard, clearBoard, setSubscribed } = boardSlice.actions;
 export default boardSlice.reducer;

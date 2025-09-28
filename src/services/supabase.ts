@@ -42,6 +42,77 @@ export const subscribeToTable = (table: string, callback: (payload: any) => void
     .subscribe();
 };
 
+// Specific subscription functions for each table
+export const subscribeToBoards = (callback: (payload: any) => void) => {
+  return supabase
+    .channel('boards_changes')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: TABLES.BOARDS },
+      callback
+    )
+    .subscribe();
+};
+
+export const subscribeToColumns = (boardId: string, callback: (payload: any) => void) => {
+  return supabase
+    .channel(`columns_changes_${boardId}`)
+    .on('postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public', 
+        table: TABLES.COLUMNS,
+        filter: `board_id=eq.${boardId}`
+      },
+      callback
+    )
+    .subscribe();
+};
+
+export const subscribeToCards = (boardId: string, callback: (payload: any) => void) => {
+  return supabase
+    .channel(`cards_changes_${boardId}`)
+    .on('postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public', 
+        table: TABLES.CARDS
+      },
+      callback
+    )
+    .subscribe();
+};
+
+// Subscription management
+export class SubscriptionManager {
+  private subscriptions: Map<string, any> = new Map();
+
+  subscribe(key: string, subscription: any) {
+    this.unsubscribe(key);
+    this.subscriptions.set(key, subscription);
+  }
+
+  unsubscribe(key: string) {
+    const subscription = this.subscriptions.get(key);
+    if (subscription) {
+      supabase.removeChannel(subscription);
+      this.subscriptions.delete(key);
+    }
+  }
+
+  unsubscribeAll() {
+    this.subscriptions.forEach((subscription) => {
+      supabase.removeChannel(subscription);
+    });
+    this.subscriptions.clear();
+  }
+
+  getActiveSubscriptions() {
+    return Array.from(this.subscriptions.keys());
+  }
+}
+
+export const subscriptionManager = new SubscriptionManager();
+
 // Error handling helper
 export const handleSupabaseError = (error: any) => {
   console.error('Supabase error:', error);

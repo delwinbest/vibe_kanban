@@ -5,7 +5,7 @@ A modern Trello-style kanban board application built with React, TypeScript, and
 ## Features
 
 - 🎯 **Drag & Drop Interface**: Smooth card movement between columns using @dnd-kit
-- 🔄 **Real-time Collaboration**: Live updates using Supabase real-time subscriptions
+- 🔄 **Real-time Collaboration**: Live updates using Supabase real-time subscriptions ✅
 - 📋 **Comprehensive Card Management**: Cards with titles, descriptions, due dates, labels, priorities, and assignees
 - 📊 **Column Management**: Add, rename, delete, and reorder columns
 - 📱 **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
@@ -181,6 +181,29 @@ npm run dev
 
 The application will be available at `http://localhost:3000`.
 
+## Real-time Features
+
+### Real-time Subscriptions
+The application includes comprehensive real-time functionality powered by Supabase:
+
+- **Board Changes**: Live updates when board names or settings change
+- **Column Management**: Real-time column creation, updates, and deletion
+- **Card Operations**: Instant updates for card moves, edits, and status changes
+- **Automatic Cleanup**: Subscriptions are properly managed and cleaned up on component unmount
+
+### Subscription Management
+- **Smart Filtering**: Subscriptions are filtered by board ID for optimal performance
+- **Connection Management**: Automatic reconnection and error handling
+- **Memory Efficient**: Proper cleanup prevents memory leaks
+- **Debug Logging**: Console logs help track subscription status and changes
+
+### Testing Real-time Features
+To test real-time functionality:
+1. Open the application in multiple browser tabs
+2. Make changes in one tab (edit cards, move items, etc.)
+3. Observe live updates in other tabs
+4. Check browser console for subscription logs
+
 ## Available Scripts
 
 - `npm run dev` - Start development server
@@ -281,6 +304,7 @@ If you encounter any issues or have questions, please:
 
 ## Roadmap
 
+- [x] Real-time collaboration and live updates ✅
 - [ ] Multiple board support
 - [ ] User authentication and authorization
 - [ ] Advanced filtering and search

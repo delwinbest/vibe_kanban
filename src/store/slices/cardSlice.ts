@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Card, CreateCardRequest, UpdateCardRequest } from '../../types';
-import { supabase, TABLES, handleSupabaseError } from '../../services/supabase';
+import { supabase, TABLES, handleSupabaseError, subscribeToCards, subscriptionManager } from '../../services/supabase';
 
 // Initial state
 interface CardState {
   cards: Card[];
   loading: boolean;
   error: string | null;
+  isSubscribed: boolean;
 }
 
 const initialState: CardState = {
   cards: [],
   loading: false,
   error: null,
+  isSubscribed: false,
 };
 
 // Helper function to transform database response to frontend format
@@ -145,6 +147,41 @@ export const moveCard = createAsyncThunk(
   }
 );
 
+// Real-time subscription actions
+export const subscribeToCardChanges = createAsyncThunk(
+  'cards/subscribeToCardChanges',
+  async (boardId: string, { dispatch }) => {
+    const subscription = subscribeToCards(boardId, (payload) => {
+      console.log('Card change received:', payload);
+      
+      switch (payload.eventType) {
+        case 'INSERT':
+          dispatch(addCard(transformCard(payload.new)));
+          break;
+        case 'UPDATE':
+          dispatch(updateCardInState(transformCard(payload.new)));
+          break;
+        case 'DELETE':
+          dispatch(removeCard(payload.old.id));
+          break;
+        default:
+          break;
+      }
+    });
+
+    subscriptionManager.subscribe(`cards_${boardId}`, subscription);
+    return true;
+  }
+);
+
+export const unsubscribeFromCardChanges = createAsyncThunk(
+  'cards/unsubscribeFromCardChanges',
+  async (boardId: string) => {
+    subscriptionManager.unsubscribe(`cards_${boardId}`);
+    return true;
+  }
+);
+
 // Slice
 const cardSlice = createSlice({
   name: 'cards',
@@ -176,6 +213,21 @@ const cardSlice = createSlice({
         state.cards[cardIndex].columnId = newColumnId;
         state.cards[cardIndex].position = newPosition;
       }
+    },
+    addCard: (state, action: PayloadAction<Card>) => {
+      state.cards.push(action.payload);
+    },
+    updateCardInState: (state, action: PayloadAction<Card>) => {
+      const index = state.cards.findIndex(card => card.id === action.payload.id);
+      if (index !== -1) {
+        state.cards[index] = action.payload;
+      }
+    },
+    removeCard: (state, action: PayloadAction<string>) => {
+      state.cards = state.cards.filter(card => card.id !== action.payload);
+    },
+    setSubscribed: (state, action: PayloadAction<boolean>) => {
+      state.isSubscribed = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -262,9 +314,21 @@ const cardSlice = createSlice({
       .addCase(moveCard.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to move card';
+      })
+      // Subscribe to card changes
+      .addCase(subscribeToCardChanges.fulfilled, (state) => {
+        state.isSubscribed = true;
+      })
+      .addCase(subscribeToCardChanges.rejected, (state) => {
+        state.isSubscribed = false;
+        state.error = 'Failed to subscribe to card changes';
+      })
+      // Unsubscribe from card changes
+      .addCase(unsubscribeFromCardChanges.fulfilled, (state) => {
+        state.isSubscribed = false;
       });
   },
 });
 
-export const { clearError, reorderCardsInColumn, moveCardBetweenColumns } = cardSlice.actions;
+export const { clearError, reorderCardsInColumn, moveCardBetweenColumns, addCard, updateCardInState, removeCard, setSubscribed } = cardSlice.actions;
 export default cardSlice.reducer;

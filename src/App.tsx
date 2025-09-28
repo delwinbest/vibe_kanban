@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
+import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns } from './store/slices/columnSlice';
@@ -14,25 +15,27 @@ import './styles/globals.css';
 
 function App() {
   const dispatch = useAppDispatch();
-  const { board, columns, cards, loading, error } = useAppSelector((state) => ({
-    board: state.board.board,
-    columns: state.columns.columns,
-    cards: state.cards.cards,
+  
+  // Board ID - you can change this as needed
+  const boardId = '550e8400-e29b-41d4-a716-446655440000';
+  
+  // Set up real-time subscriptions
+  const { board, columns, cards, isSubscribed } = useRealtimeSubscriptions(boardId);
+  
+  const { loading, error } = useAppSelector((state) => ({
     loading: state.board.loading || state.columns.loading || state.cards.loading,
     error: state.board.error || state.columns.error || state.cards.error,
   }));
 
   // Debug logging
-  console.log('App state:', { board, columns, cards, loading, error });
+  console.log('App state:', { board, columns, cards, loading, error, isSubscribed });
 
   // Fetch initial data
   useEffect(() => {
-    // Fetch the default board (you can change this ID as needed)
-    const boardId = '550e8400-e29b-41d4-a716-446655440000';
     dispatch(fetchBoard(boardId));
     dispatch(fetchColumns(boardId));
     dispatch(fetchCards(boardId));
-  }, [dispatch]);
+  }, [dispatch, boardId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     dispatch(startDrag(event.active.id as string));

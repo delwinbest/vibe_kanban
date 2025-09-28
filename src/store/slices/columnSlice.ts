@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Column, CreateColumnRequest, UpdateColumnRequest } from '../../types';
-import { supabase, TABLES, handleSupabaseError } from '../../services/supabase';
+import { supabase, TABLES, handleSupabaseError, subscribeToColumns, subscriptionManager } from '../../services/supabase';
 
 // Initial state
 interface ColumnState {
   columns: Column[];
   loading: boolean;
   error: string | null;
+  isSubscribed: boolean;
 }
 
 const initialState: ColumnState = {
   columns: [],
   loading: false,
   error: null,
+  isSubscribed: false,
 };
 
 // Helper function to transform database response to frontend format
@@ -109,6 +111,41 @@ export const deleteColumn = createAsyncThunk(
   }
 );
 
+// Real-time subscription actions
+export const subscribeToColumnChanges = createAsyncThunk(
+  'columns/subscribeToColumnChanges',
+  async (boardId: string, { dispatch }) => {
+    const subscription = subscribeToColumns(boardId, (payload) => {
+      console.log('Column change received:', payload);
+      
+      switch (payload.eventType) {
+        case 'INSERT':
+          dispatch(addColumn(transformColumn(payload.new)));
+          break;
+        case 'UPDATE':
+          dispatch(updateColumnInState(transformColumn(payload.new)));
+          break;
+        case 'DELETE':
+          dispatch(removeColumn(payload.old.id));
+          break;
+        default:
+          break;
+      }
+    });
+
+    subscriptionManager.subscribe(`columns_${boardId}`, subscription);
+    return true;
+  }
+);
+
+export const unsubscribeFromColumnChanges = createAsyncThunk(
+  'columns/unsubscribeFromColumnChanges',
+  async (boardId: string) => {
+    subscriptionManager.unsubscribe(`columns_${boardId}`);
+    return true;
+  }
+);
+
 // Slice
 const columnSlice = createSlice({
   name: 'columns',
@@ -129,6 +166,21 @@ const columnSlice = createSlice({
       });
       
       state.columns = columns;
+    },
+    addColumn: (state, action: PayloadAction<Column>) => {
+      state.columns.push(action.payload);
+    },
+    updateColumnInState: (state, action: PayloadAction<Column>) => {
+      const index = state.columns.findIndex(col => col.id === action.payload.id);
+      if (index !== -1) {
+        state.columns[index] = action.payload;
+      }
+    },
+    removeColumn: (state, action: PayloadAction<string>) => {
+      state.columns = state.columns.filter(col => col.id !== action.payload);
+    },
+    setSubscribed: (state, action: PayloadAction<boolean>) => {
+      state.isSubscribed = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -195,9 +247,21 @@ const columnSlice = createSlice({
       .addCase(deleteColumn.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete column';
+      })
+      // Subscribe to column changes
+      .addCase(subscribeToColumnChanges.fulfilled, (state) => {
+        state.isSubscribed = true;
+      })
+      .addCase(subscribeToColumnChanges.rejected, (state) => {
+        state.isSubscribed = false;
+        state.error = 'Failed to subscribe to column changes';
+      })
+      // Unsubscribe from column changes
+      .addCase(unsubscribeFromColumnChanges.fulfilled, (state) => {
+        state.isSubscribed = false;
       });
   },
 });
 
-export const { clearError, reorderColumns } = columnSlice.actions;
+export const { clearError, reorderColumns, addColumn, updateColumnInState, removeColumn, setSubscribed } = columnSlice.actions;
 export default columnSlice.reducer;
