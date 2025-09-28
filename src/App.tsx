@@ -5,12 +5,13 @@ import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns, reorderColumns } from './store/slices/columnSlice';
-import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn } from './store/slices/cardSlice';
+import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import { ModalProvider, useModal } from './components/ui/ModalProvider';
 import CardCreateModal from './components/card/CardCreateModal';
+import CardDeleteModal from './components/card/CardDeleteModal';
 import './styles/globals.css';
 
 function AppContent() {
@@ -149,6 +150,30 @@ function AppContent() {
     }
   };
 
+  const handleEditCard = (card: any) => {
+    dispatch(updateCard({
+      id: card.id,
+      title: card.title,
+      description: card.description,
+      due_date: card.due_date,
+      priority: card.priority,
+      status: card.status,
+      column_id: card.column_id,
+      position: card.position,
+      assignee_id: card.assignee_id,
+    }));
+  };
+
+  const handleDeleteCard = (cardId: string) => {
+    const card = cards.find(c => c.id === cardId);
+    if (card) {
+      openModal(
+        <CardDeleteModal cardId={cardId} cardTitle={card.title} />,
+        { title: 'Delete Card', size: 'sm' }
+      );
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -178,8 +203,8 @@ function AppContent() {
         onEditColumn={(column) => console.log('Edit column:', column)}
         onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
         onAddCard={handleAddCard}
-        onEditCard={(card) => console.log('Edit card:', card)}
-        onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
+            onEditCard={handleEditCard}
+        onDeleteCard={handleDeleteCard}
         onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
         onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
       />

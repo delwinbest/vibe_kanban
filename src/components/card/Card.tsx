@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Priority } from '../../types';
 import { CardProps } from '../../types';
 
 const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) => {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [titleValue, setTitleValue] = useState(card.title);
+  const [descriptionValue, setDescriptionValue] = useState(card.description || '');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
   const {
     attributes,
     listeners,
@@ -17,6 +24,81 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  // Update values when card prop changes
+  useEffect(() => {
+    setTitleValue(card.title);
+    setDescriptionValue(card.description || '');
+  }, [card.title, card.description]);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  useEffect(() => {
+    if (isEditingDescription && descriptionTextareaRef.current) {
+      descriptionTextareaRef.current.focus();
+      descriptionTextareaRef.current.select();
+    }
+  }, [isEditingDescription]);
+
+  const handleTitleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingTitle(true);
+  };
+
+  const handleTitleSubmit = () => {
+    if (titleValue.trim() && titleValue.trim() !== card.title) {
+      onEdit({ ...card, title: titleValue.trim() });
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleCancel = () => {
+    setTitleValue(card.title);
+    setIsEditingTitle(false);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleTitleCancel();
+    }
+  };
+
+  const handleDescriptionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingDescription(true);
+  };
+
+  const handleDescriptionSubmit = () => {
+    if (descriptionValue.trim() !== (card.description || '')) {
+      onEdit({ ...card, description: descriptionValue.trim() || undefined });
+    }
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionCancel = () => {
+    setDescriptionValue(card.description || '');
+    setIsEditingDescription(false);
+  };
+
+  const handleDescriptionKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleDescriptionSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleDescriptionCancel();
+    }
   };
 
   const getPriorityBadge = (priority: Priority) => {
@@ -69,9 +151,26 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     >
       {/* Card Header */}
       <div className="flex items-start justify-between mb-3">
-        <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 pr-2">
-          {card.title}
-        </h4>
+        {isEditingTitle ? (
+          <input
+            ref={titleInputRef}
+            type="text"
+            value={titleValue}
+            onChange={(e) => setTitleValue(e.target.value)}
+            onBlur={handleTitleSubmit}
+            onKeyDown={handleTitleKeyDown}
+            className="font-semibold text-gray-900 text-sm leading-tight flex-1 pr-2 bg-transparent border-none outline-none resize-none"
+            style={{ minHeight: '1.25rem' }}
+          />
+        ) : (
+          <h4 
+            className="font-semibold text-gray-900 text-sm leading-tight flex-1 pr-2 cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 -mx-1 -my-0.5"
+            onClick={handleTitleClick}
+            title="Click to edit title"
+          >
+            {card.title}
+          </h4>
+        )}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => {
@@ -109,10 +208,27 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
       </div>
 
       {/* Card Description */}
-      {card.description && (
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {card.description}
-        </p>
+      {isEditingDescription ? (
+        <textarea
+          ref={descriptionTextareaRef}
+          value={descriptionValue}
+          onChange={(e) => setDescriptionValue(e.target.value)}
+          onBlur={handleDescriptionSubmit}
+          onKeyDown={handleDescriptionKeyDown}
+          className="w-full text-sm text-gray-600 mb-3 bg-transparent border-none outline-none resize-none min-h-[2rem]"
+          placeholder="Add a description..."
+          rows={2}
+        />
+      ) : (
+        <div 
+          className="text-sm text-gray-600 mb-3 line-clamp-2 cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 -mx-1 -my-0.5 min-h-[1.5rem]"
+          onClick={handleDescriptionClick}
+          title="Click to edit description"
+        >
+          {card.description || (
+            <span className="text-gray-400 italic">Add a description...</span>
+          )}
+        </div>
       )}
 
       {/* Status and Priority Badges */}
