@@ -119,9 +119,28 @@ alwaysApply: true
 
 ## Code Review Process
 
+### Pre-Commit Checklist (MANDATORY)
+**ALWAYS run these commands before committing code:**
+```bash
+# 1. Type checking (MUST PASS)
+npm run type-check
+
+# 2. Linting (MUST PASS)
+npm run lint
+
+# 3. Build verification (MUST PASS)
+npm run build
+
+# 4. Only commit if all checks pass
+git add .
+git commit -m "your commit message"
+```
+
+**Type checking failures are BLOCKING issues - do not commit until resolved.**
+
 ### Before Submitting PR
 - [ ] **Run linting**: `npm run lint`
-- [ ] **Type checking**: `npm run type-check`
+- [ ] **Type checking**: `npm run type-check` (MANDATORY - must pass before commit)
 - [ ] **Test locally**: Verify functionality works
 - [ ] **Update documentation**: README, TODO.md, CHAT_CONTEXT_SUMMARY.md
 - [ ] **Check for breaking changes**
@@ -398,9 +417,28 @@ git commit -m "resolve: Merge conflicts in file.ts"
 
 ## Code Review Process
 
+### Pre-Commit Checklist (MANDATORY)
+**ALWAYS run these commands before committing code:**
+```bash
+# 1. Type checking (MUST PASS)
+npm run type-check
+
+# 2. Linting (MUST PASS)
+npm run lint
+
+# 3. Build verification (MUST PASS)
+npm run build
+
+# 4. Only commit if all checks pass
+git add .
+git commit -m "your commit message"
+```
+
+**Type checking failures are BLOCKING issues - do not commit until resolved.**
+
 ### Before Submitting PR
 - [ ] **Run linting**: `npm run lint`
-- [ ] **Type checking**: `npm run type-check`
+- [ ] **Type checking**: `npm run type-check` (MANDATORY - must pass before commit)
 - [ ] **Test locally**: Verify functionality works
 - [ ] **Update documentation**: README, TODO.md, CHAT_CONTEXT_SUMMARY.md
 - [ ] **Check for breaking changes**

@@ -290,10 +290,10 @@ const columnSlice = createSlice({
       })
       .addCase(reorderColumnsInDatabase.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload && !action.payload.error) {
+        if (action.payload && !('error' in action.payload)) {
           state.columns = action.payload;
         } else {
-          state.error = action.payload?.error || 'Failed to reorder columns';
+          state.error = ('error' in action.payload ? action.payload.error : 'Failed to reorder columns');
         }
       })
       .addCase(reorderColumnsInDatabase.rejected, (state, action) => {

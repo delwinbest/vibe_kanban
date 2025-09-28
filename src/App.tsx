@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
-import { fetchColumns, reorderColumns, reorderColumnsInDatabase, createColumn, updateColumn, deleteColumn } from './store/slices/columnSlice';
+import { fetchColumns, reorderColumns, reorderColumnsInDatabase } from './store/slices/columnSlice';
 import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
