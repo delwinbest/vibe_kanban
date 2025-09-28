@@ -114,22 +114,17 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     }
   };
 
-  const getStatusBadge = () => {
-    // This would come from card status in a real app
-    const statuses = ['Started', 'Ongoing', 'In Progress', 'Completed', 'Not Started'];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    switch (randomStatus) {
-      case 'Started':
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'started':
         return { label: 'Started', className: 'status-started' };
-      case 'Ongoing':
+      case 'ongoing':
         return { label: 'Ongoing', className: 'status-ongoing' };
-      case 'In Progress':
+      case 'in_progress':
         return { label: 'In Progress', className: 'status-in-progress' };
-      case 'Completed':
+      case 'completed':
         return { label: 'Completed', className: 'status-completed' };
-      case 'Not Started':
-        return { label: 'Not Started', className: 'status-not-started' };
+      case 'not_started':
       default:
         return { label: 'Not Started', className: 'status-not-started' };
     }
@@ -137,7 +132,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
 
   const isOverdue = card.due_date && new Date(card.due_date) < new Date();
   const priorityBadge = getPriorityBadge(card.priority);
-  const statusBadge = getStatusBadge();
+  const statusBadge = getStatusBadge(card.status);
 
   return (
     <div
