@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card as CardType, Priority } from '../../types';
+import { Priority } from '../../types';
 import { CardProps } from '../../types';
 
-const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
+const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) => {
   const {
     attributes,
     listeners,

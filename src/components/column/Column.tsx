@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Column as ColumnType, Card } from '../../types';
+// import { Card } from '../../types';
 import CardComponent from '../card/Card';
 import { ColumnProps } from '../../types';
 

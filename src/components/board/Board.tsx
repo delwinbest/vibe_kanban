@@ -25,10 +25,10 @@ const Board: React.FC<BoardProps> = ({
   onEditColumn,
   onDeleteColumn,
   onAddCard,
-  onEditCard,
-  onDeleteCard,
+  onEditCard: _onEditCard,
+  onDeleteCard: _onDeleteCard,
   onMoveCard,
-  onMoveColumn
+  onMoveColumn: _onMoveColumn
 }) => {
   if (!board) {
     return (
@@ -71,21 +71,23 @@ const Board: React.FC<BoardProps> = ({
     }
   };
 
-  const handleEditCard = (card: Card) => {
-    if (onEditCard) {
-      onEditCard(card);
-    } else {
-      console.log('Edit card functionality not implemented');
-    }
-  };
+  // TODO: Implement card editing functionality
+  // const handleEditCard = (_card: Card) => {
+  //   if (onEditCard) {
+  //     onEditCard(_card);
+  //   } else {
+  //     console.log('Edit card functionality not implemented');
+  //   }
+  // };
 
-  const handleDeleteCard = (cardId: string) => {
-    if (onDeleteCard) {
-      onDeleteCard(cardId);
-    } else {
-      console.log('Delete card functionality not implemented');
-    }
-  };
+  // TODO: Implement card deletion functionality
+  // const handleDeleteCard = (_cardId: string) => {
+  //   if (onDeleteCard) {
+  //     onDeleteCard(_cardId);
+  //   } else {
+  //     console.log('Delete card functionality not implemented');
+  //   }
+  // };
 
   const handleMoveCard = (cardId: string, newColumnId: string, newPosition: number) => {
     if (onMoveCard) {
