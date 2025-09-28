@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { Board as BoardType, Column, Card } from '../../types';
 import ColumnComponent from '../column/Column';
@@ -274,4 +274,4 @@ const Board: React.FC<BoardProps> = ({
   );
 };
 
-export default Board;
+export default memo(Board);

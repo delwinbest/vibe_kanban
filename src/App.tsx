@@ -26,7 +26,10 @@ function AppContent() {
   const { board, columns, cards, isSubscribed } = useRealtimeSubscriptions(boardId);
   
   const { loading, error } = useAppSelector((state) => ({
-    loading: state.board.loading || state.columns.loading || state.cards.loading,
+    // Only show loading for initial data fetch, not for card operations
+    loading: (state.board.loading && !state.board.board) || 
+             (state.columns.loading && state.columns.columns.length === 0) || 
+             (state.cards.loading && state.cards.cards.length === 0),
     error: state.board.error || state.columns.error || state.cards.error,
   }));
 
