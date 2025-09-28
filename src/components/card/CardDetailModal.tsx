@@ -50,10 +50,8 @@ const CardDetailModal: React.FC<CardDetailModalProps> = ({ card }) => {
       debugLog.api.success('updateCard', result);
       debugLog.card.edit(card.id, updateData);
       
-      // Add a small delay to prevent DOM manipulation issues
-      setTimeout(() => {
-        closeModal();
-      }, 100);
+      // Close modal immediately - no delay needed with optimistic updates
+      closeModal();
     } catch (err) {
       debugLog.api.error('updateCard', err);
       setError(err instanceof Error ? err.message : 'Failed to update card');

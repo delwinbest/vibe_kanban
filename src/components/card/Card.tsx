@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Priority } from '../../types';
@@ -398,4 +398,4 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
   );
 };
 
-export default Card;
+export default memo(Card);

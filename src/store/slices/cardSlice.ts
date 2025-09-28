@@ -158,13 +158,24 @@ export const subscribeToCardChanges = createAsyncThunk(
       
       switch (payload.eventType) {
         case 'INSERT':
-          dispatch(addCard(transformCard(payload.new)));
+          // Delay to allow pending operations to complete first
+          setTimeout(() => {
+            dispatch(addCard(transformCard(payload.new)));
+          }, 100);
           break;
         case 'UPDATE':
-          dispatch(updateCardInState(transformCard(payload.new)));
+          // Only update if not a temporary card (prevents conflicts with optimistic updates)
+          if (!payload.new.id.toString().startsWith('temp-')) {
+            setTimeout(() => {
+              dispatch(updateCardInState(transformCard(payload.new)));
+            }, 100);
+          }
           break;
         case 'DELETE':
-          dispatch(removeCard(payload.old.id));
+          // Delay to allow optimistic delete to process first
+          setTimeout(() => {
+            dispatch(removeCard(payload.old.id));
+          }, 100);
           break;
         default:
           break;
@@ -221,7 +232,11 @@ const cardSlice = createSlice({
       }
     },
     addCard: (state, action: PayloadAction<Card>) => {
-      state.cards.push(action.payload);
+      // Only add if not already present (prevents duplication from real-time subscriptions)
+      const existingCard = state.cards.find(card => card.id === action.payload.id);
+      if (!existingCard) {
+        state.cards.push(action.payload);
+      }
     },
     updateCardInState: (state, action: PayloadAction<Card>) => {
       const index = state.cards.findIndex(card => card.id === action.payload.id);
@@ -251,75 +266,114 @@ const cardSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch cards';
       })
-      // Create card
-      .addCase(createCard.pending, (state) => {
-        state.loading = true;
+      // Create card - optimistic update, no loading state to prevent full re-render
+      .addCase(createCard.pending, (state, action) => {
         state.error = null;
+        // Add optimistic card immediately (will be replaced by real data when fulfilled)
+        const tempCard = {
+          id: `temp-${Date.now()}`, // Temporary ID
+          column_id: action.meta.arg.column_id,
+          title: action.meta.arg.title,
+          description: action.meta.arg.description,
+          due_date: action.meta.arg.due_date,
+          priority: action.meta.arg.priority || 'P3',
+          status: action.meta.arg.status || 'not_started',
+          position: 0,
+          assignee_id: undefined,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        state.cards.push(tempCard);
       })
       .addCase(createCard.fulfilled, (state, action) => {
-        state.loading = false;
         if (action.payload && !action.payload.error) {
-          state.cards.push(action.payload);
+          // Remove temporary card and add real card
+          const tempCardIndex = state.cards.findIndex(card => card.id.startsWith('temp-'));
+          if (tempCardIndex !== -1) {
+            state.cards.splice(tempCardIndex, 1);
+          }
+          const transformedCard = transformCard(action.payload);
+          // Only add if not already present (to avoid duplication from real-time subscriptions)
+          const existingCard = state.cards.find(card => card.id === transformedCard.id);
+          if (!existingCard) {
+            state.cards.push(transformedCard);
+          }
         } else {
+          // Remove temporary card on error
+          const tempCardIndex = state.cards.findIndex(card => card.id.startsWith('temp-'));
+          if (tempCardIndex !== -1) {
+            state.cards.splice(tempCardIndex, 1);
+          }
           state.error = action.payload?.error || 'Failed to create card';
         }
       })
       .addCase(createCard.rejected, (state, action) => {
-        state.loading = false;
+        // Remove temporary card on error
+        const tempCardIndex = state.cards.findIndex(card => card.id.startsWith('temp-'));
+        if (tempCardIndex !== -1) {
+          state.cards.splice(tempCardIndex, 1);
+        }
         state.error = action.error.message || 'Failed to create card';
       })
-      // Update card
-      .addCase(updateCard.pending, (state) => {
-        state.loading = true;
+      // Update card - optimistic update, no loading state
+      .addCase(updateCard.pending, (state, action) => {
         state.error = null;
+        // Apply optimistic update immediately
+        const index = state.cards.findIndex(card => card.id === action.meta.arg.id);
+        if (index !== -1) {
+          state.cards[index] = {
+            ...state.cards[index],
+            ...action.meta.arg,
+            updated_at: new Date().toISOString(),
+          };
+        }
       })
       .addCase(updateCard.fulfilled, (state, action) => {
-        state.loading = false;
         if (action.payload && !action.payload.error) {
           const index = state.cards.findIndex(card => card.id === action.payload.id);
           if (index !== -1) {
-            state.cards[index] = action.payload;
+            state.cards[index] = transformCard(action.payload);
           }
         } else {
           state.error = action.payload?.error || 'Failed to update card';
         }
       })
       .addCase(updateCard.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to update card';
+        // TODO: Revert optimistic update on error
       })
-      // Delete card
-      .addCase(deleteCard.pending, (state) => {
-        state.loading = true;
+      // Delete card - optimistic update, no loading state
+      .addCase(deleteCard.pending, (state, action) => {
         state.error = null;
+        // Optimistically remove card immediately
+        state.cards = state.cards.filter(card => card.id !== action.meta.arg);
       })
-      .addCase(deleteCard.fulfilled, (state, action) => {
-        state.loading = false;
-        state.cards = state.cards.filter(card => card.id !== action.payload);
+      .addCase(deleteCard.fulfilled, (_state, _action) => {
+        // Card already removed optimistically, nothing to do
+        // Real-time subscription will handle any cleanup if needed
       })
       .addCase(deleteCard.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to delete card';
+        // TODO: Restore deleted card on error (would need to store it temporarily)
       })
-      // Move card
-      .addCase(moveCard.pending, (state) => {
-        state.loading = true;
+      // Move card - optimistic update, no loading state
+      .addCase(moveCard.pending, (state, _action) => {
         state.error = null;
+        // Optimistic update already handled by drag & drop reducers
       })
       .addCase(moveCard.fulfilled, (state, action) => {
-        state.loading = false;
         if (action.payload && !action.payload.error) {
           const index = state.cards.findIndex(card => card.id === action.payload.id);
           if (index !== -1) {
-            state.cards[index] = action.payload;
+            state.cards[index] = transformCard(action.payload);
           }
         } else {
           state.error = action.payload?.error || 'Failed to move card';
         }
       })
       .addCase(moveCard.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.error.message || 'Failed to move card';
+        // TODO: Revert optimistic move on error
       })
       // Subscribe to card changes
       .addCase(subscribeToCardChanges.fulfilled, (state) => {

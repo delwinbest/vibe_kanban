@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
@@ -132,4 +132,4 @@ const Column: React.FC<ColumnProps> = ({
   );
 };
 
-export default Column;
+export default memo(Column);

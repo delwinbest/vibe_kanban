@@ -51,10 +51,8 @@ const CardCreateModal: React.FC<CardCreateModalProps> = ({ columnId, columnName 
       debugLog.api.success('createCard', result);
       debugLog.card.create(result);
       
-      // Add a small delay to prevent DOM manipulation issues
-      setTimeout(() => {
-        closeModal();
-      }, 100);
+      // Close modal immediately - no delay needed with optimistic updates
+      closeModal();
     } catch (err) {
       debugLog.api.error('createCard', err);
       setError(err instanceof Error ? err.message : 'Failed to create card');
