@@ -15,11 +15,15 @@ const CardDeleteModal: React.FC<CardDeleteModalProps> = ({ cardId, cardTitle }) 
 
   const handleDelete = async () => {
     try {
-      debugLog.api.request('deleteCard', { cardId });
-      const result = await dispatch(deleteCard(cardId)).unwrap();
-      debugLog.api.success('deleteCard', result);
-      debugLog.card.delete(cardId, cardTitle);
-      closeModal();
+          debugLog.api.request('deleteCard', { cardId });
+          const result = await dispatch(deleteCard(cardId)).unwrap();
+          debugLog.api.success('deleteCard', result);
+          debugLog.card.delete(cardId, cardTitle);
+          
+          // Add a small delay to prevent DOM manipulation issues
+          setTimeout(() => {
+            closeModal();
+          }, 100);
     } catch (error) {
       debugLog.api.error('deleteCard', error);
       console.error('Failed to delete card:', error);
