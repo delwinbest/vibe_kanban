@@ -9,6 +9,7 @@ alwaysApply: true
 
 ### General Git Branching Management
 - Always ensure local respoitories are up to date before making changes to local branches. 
+- Before making any changes to code, ensur you follow the branching strategy outlined in this document. Start by making sure you are using the correct branch. 
 
 ### Branch Structure
 - **`main`**: Production branch - only for stable, tested code
