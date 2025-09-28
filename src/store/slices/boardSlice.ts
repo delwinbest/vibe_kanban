@@ -21,8 +21,8 @@ const initialState: BoardState = {
 const transformBoard = (dbBoard: any) => ({
   id: dbBoard.id,
   name: dbBoard.name,
-  createdAt: dbBoard.created_at,
-  updatedAt: dbBoard.updated_at,
+  created_at: dbBoard.created_at,
+  updated_at: dbBoard.updated_at,
 });
 
 // Async thunks

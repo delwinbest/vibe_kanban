@@ -4,8 +4,8 @@ import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
-import { fetchColumns } from './store/slices/columnSlice';
-import { fetchCards } from './store/slices/cardSlice';
+import { fetchColumns, reorderColumns } from './store/slices/columnSlice';
+import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -45,9 +45,96 @@ function App() {
     dispatch(setDragOverColumn(over?.id as string || null));
   };
 
-  const handleDragEnd = (_event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over) {
+      dispatch(endDrag());
+      return;
+    }
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Find the active item (card or column)
+    const activeCard = cards.find(card => card.id === activeId);
+    const activeColumn = columns.find(column => column.id === activeId);
+
+    if (activeCard) {
+      // Handle card drag
+      const overColumn = columns.find(column => column.id === overId);
+      const overCard = cards.find(card => card.id === overId);
+      
+      if (overColumn) {
+        // Card dropped on a column
+        if (activeCard.column_id === overColumn.id) {
+          // Same column - reorder within column
+          const columnCards = cards.filter(card => card.column_id === overColumn.id).sort((a, b) => a.position - b.position);
+          const activeIndex = columnCards.findIndex(card => card.id === activeCard.id);
+          const newPosition = columnCards.length - 1; // Move to end
+          
+          if (activeIndex !== newPosition) {
+            dispatch(reorderCardsInColumn({
+              columnId: overColumn.id,
+              fromIndex: activeIndex,
+              toIndex: newPosition
+            }));
+          }
+        } else {
+          // Different column - move between columns
+          const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
+          dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: overColumn.id,
+            newPosition
+          }));
+        }
+      } else if (overCard) {
+        // Card dropped on another card
+        const targetColumnId = overCard.column_id;
+        const targetColumnCards = cards.filter(card => card.column_id === targetColumnId).sort((a, b) => a.position - b.position);
+        const targetPosition = targetColumnCards.findIndex(card => card.id === overCard.id);
+        
+        if (activeCard.column_id === targetColumnId) {
+          // Same column - reorder within column
+          const activeIndex = targetColumnCards.findIndex(card => card.id === activeCard.id);
+          if (activeIndex !== targetPosition) {
+            dispatch(reorderCardsInColumn({
+              columnId: targetColumnId,
+              fromIndex: activeIndex,
+              toIndex: targetPosition
+            }));
+          }
+        } else {
+          // Different column - move between columns
+          dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: targetColumnId,
+            newPosition: targetPosition
+          }));
+        }
+      }
+    } else if (activeColumn) {
+      // Handle column drag
+      const overColumn = columns.find(column => column.id === overId);
+      if (overColumn && activeColumn.id !== overColumn.id) {
+        const activeIndex = columns.findIndex(col => col.id === activeColumn.id);
+        const overIndex = columns.findIndex(col => col.id === overColumn.id);
+        
+        // Create new positions array
+        const newColumns = [...columns];
+        const [movedColumn] = newColumns.splice(activeIndex, 1);
+        newColumns.splice(overIndex, 0, movedColumn);
+        
+        // Update positions
+        dispatch(reorderColumns({
+          fromIndex: activeIndex,
+          toIndex: overIndex
+        }));
+      }
+    }
+
     dispatch(endDrag());
-    // TODO: Implement drag end logic for moving cards/columns
   };
 
   if (loading) {

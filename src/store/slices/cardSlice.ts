@@ -20,14 +20,16 @@ const initialState: CardState = {
 // Helper function to transform database response to frontend format
 const transformCard = (dbCard: any) => ({
   id: dbCard.id,
-  columnId: dbCard.column_id,
+  column_id: dbCard.column_id,
   title: dbCard.title,
   description: dbCard.description,
-  dueDate: dbCard.due_date,
+  due_date: dbCard.due_date,
   priority: dbCard.priority,
+  status: dbCard.status,
   position: dbCard.position,
-  createdAt: dbCard.created_at,
-  updatedAt: dbCard.updated_at,
+  assignee_id: dbCard.assignee_id,
+  created_at: dbCard.created_at,
+  updated_at: dbCard.updated_at,
 });
 
 // Async thunks
@@ -62,11 +64,12 @@ export const createCard = createAsyncThunk(
       const { data, error } = await supabase
         .from(TABLES.CARDS)
         .insert([{
-          column_id: request.columnId,
+          column_id: request.column_id,
           title: request.title,
           description: request.description,
-          due_date: request.dueDate,
-          priority: request.priority || 'medium',
+          due_date: request.due_date,
+          priority: request.priority || 'P3',
+          status: request.status || 'not_started',
           position: 0, // Will be updated based on existing cards
         }])
         .select()
@@ -89,10 +92,12 @@ export const updateCard = createAsyncThunk(
         .update({
           ...(request.title && { title: request.title }),
           ...(request.description !== undefined && { description: request.description }),
-          ...(request.dueDate !== undefined && { due_date: request.dueDate }),
+          ...(request.due_date !== undefined && { due_date: request.due_date }),
           ...(request.priority && { priority: request.priority }),
-          ...(request.columnId && { column_id: request.columnId }),
+          ...(request.status && { status: request.status }),
+          ...(request.column_id && { column_id: request.column_id }),
           ...(request.position !== undefined && { position: request.position }),
+          ...(request.assignee_id && { assignee_id: request.assignee_id }),
           updated_at: new Date().toISOString(),
         })
         .eq('id', request.id)
@@ -192,8 +197,8 @@ const cardSlice = createSlice({
     },
     reorderCardsInColumn: (state, action: PayloadAction<{ columnId: string; fromIndex: number; toIndex: number }>) => {
       const { columnId, fromIndex, toIndex } = action.payload;
-      const columnCards = [...state.cards.filter(card => card.columnId === columnId)];
-      const otherCards = state.cards.filter(card => card.columnId !== columnId);
+      const columnCards = [...state.cards.filter(card => card.column_id === columnId)];
+      const otherCards = state.cards.filter(card => card.column_id !== columnId);
       
       const [movedCard] = columnCards.splice(fromIndex, 1);
       columnCards.splice(toIndex, 0, movedCard);
@@ -213,7 +218,7 @@ const cardSlice = createSlice({
       if (cardIndex !== -1) {
         state.cards[cardIndex] = {
           ...state.cards[cardIndex],
-          columnId: newColumnId,
+          column_id: newColumnId,
           position: newPosition
         };
       }
@@ -243,7 +248,7 @@ const cardSlice = createSlice({
       })
       .addCase(fetchCards.fulfilled, (state, action) => {
         state.loading = false;
-        state.cards = action.payload;
+        state.cards = action.payload.map(transformCard);
       })
       .addCase(fetchCards.rejected, (state, action) => {
         state.loading = false;

@@ -21,14 +21,12 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case 'low':
-        return { label: 'P3', className: 'priority-p3' };
-      case 'medium':
+      case 'P1':
+        return { label: 'P1', className: 'priority-p1' };
+      case 'P2':
         return { label: 'P2', className: 'priority-p2' };
-      case 'high':
-        return { label: 'P1', className: 'priority-p1' };
-      case 'critical':
-        return { label: 'P1', className: 'priority-p1' };
+      case 'P3':
+        return { label: 'P3', className: 'priority-p3' };
       default:
         return { label: 'P3', className: 'priority-p3' };
     }
@@ -55,7 +53,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     }
   };
 
-  const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
+  const isOverdue = card.due_date && new Date(card.due_date) < new Date();
   const priorityBadge = getPriorityBadge(card.priority);
   const statusBadge = getStatusBadge();
 
@@ -63,7 +61,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     <div
       ref={setNodeRef}
       style={style}
-      className={`kanban-card group ${
+      className={`kanban-card group cursor-grab active:cursor-grabbing ${
         isDragging ? 'opacity-50 shadow-lg' : ''
       }`}
       {...attributes}
@@ -99,6 +97,14 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
+          <button
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Drag to move"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -122,7 +128,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
       {/* Card Footer */}
       <div className="flex items-center justify-between">
         {/* Due Date */}
-        {card.dueDate && (
+        {card.due_date && (
           <span
             className={`text-xs px-2 py-1 rounded ${
               isOverdue
@@ -130,7 +136,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
                 : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {new Date(card.dueDate).toLocaleDateString()}
+            {new Date(card.due_date).toLocaleDateString()}
           </span>
         )}
 

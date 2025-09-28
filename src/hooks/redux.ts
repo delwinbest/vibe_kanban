@@ -28,7 +28,7 @@ export const useUI = () => {
 export const useCardsInColumn = (columnId: string) => {
   return useAppSelector((state) => 
     state.cards.cards
-      .filter((card) => card.columnId === columnId)
+      .filter((card) => card.column_id === columnId)
       .sort((a, b) => a.position - b.position)
   );
 };

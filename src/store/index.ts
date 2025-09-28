@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import boardReducer from './slices/boardSlice';
 import columnReducer from './slices/columnSlice';
 import cardReducer from './slices/cardSlice';
+import labelReducer from './slices/labelSlice';
 import uiReducer from './slices/uiSlice';
 
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     board: boardReducer,
     columns: columnReducer,
     cards: cardReducer,
+    labels: labelReducer,
     ui: uiReducer,
   },
   middleware: (getDefaultMiddleware) =>

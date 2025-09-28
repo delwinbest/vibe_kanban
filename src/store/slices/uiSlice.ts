@@ -6,6 +6,11 @@ interface UIState {
   isCardModalOpen: boolean;
   isColumnModalOpen: boolean;
   isDeleteConfirmModalOpen: boolean;
+  modal: {
+    isOpen: boolean;
+    type: string | null;
+    data: any;
+  };
   
   // Selected items
   selectedCard: string | null;
@@ -30,6 +35,11 @@ const initialState: UIState = {
   isCardModalOpen: false,
   isColumnModalOpen: false,
   isDeleteConfirmModalOpen: false,
+  modal: {
+    isOpen: false,
+    type: null,
+    data: null,
+  },
   selectedCard: null,
   selectedColumn: null,
   draggedItem: null,
