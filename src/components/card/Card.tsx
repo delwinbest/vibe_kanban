@@ -138,11 +138,10 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     <div
       ref={setNodeRef}
       style={style}
-      className={`kanban-card group cursor-grab active:cursor-grabbing ${
+      className={`kanban-card group ${
         isDragging ? 'opacity-50 shadow-lg' : ''
       }`}
       {...attributes}
-      {...listeners}
     >
       {/* Card Header */}
       <div className="flex items-start justify-between mb-3">
@@ -192,7 +191,8 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
             </svg>
           </button>
           <button
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            {...listeners}
+            className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors"
             title="Drag to move"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
