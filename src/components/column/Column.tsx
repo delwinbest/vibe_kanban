@@ -28,7 +28,7 @@ const Column: React.FC<ColumnProps> = ({
   };
 
   const columnCards = [...cards]
-    .filter(card => card.columnId === column.id)
+    .filter(card => card.column_id === column.id)
     .sort((a, b) => a.position - b.position);
 
   return (

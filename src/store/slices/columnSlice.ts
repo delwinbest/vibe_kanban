@@ -20,11 +20,11 @@ const initialState: ColumnState = {
 // Helper function to transform database response to frontend format
 const transformColumn = (dbColumn: any) => ({
   id: dbColumn.id,
-  boardId: dbColumn.board_id,
+  board_id: dbColumn.board_id,
   name: dbColumn.name,
   position: dbColumn.position,
-  createdAt: dbColumn.created_at,
-  updatedAt: dbColumn.updated_at,
+  created_at: dbColumn.created_at,
+  updated_at: dbColumn.updated_at,
 });
 
 // Async thunks
@@ -56,7 +56,7 @@ export const createColumn = createAsyncThunk(
       const { data, error } = await supabase
         .from(TABLES.COLUMNS)
         .insert([{
-          board_id: request.boardId,
+          board_id: request.board_id,
           name: request.name,
           position: request.position,
         }])
@@ -193,7 +193,7 @@ const columnSlice = createSlice({
       })
       .addCase(fetchColumns.fulfilled, (state, action) => {
         state.loading = false;
-        state.columns = action.payload;
+        state.columns = action.payload.map(transformColumn);
       })
       .addCase(fetchColumns.rejected, (state, action) => {
         state.loading = false;

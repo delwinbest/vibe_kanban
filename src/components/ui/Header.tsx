@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ board }) => {
             </h1>
             {board && (
               <span className="text-sm text-gray-500">
-                Last updated: {new Date(board.updatedAt).toLocaleDateString()}
+                Last updated: {new Date(board.updated_at).toLocaleDateString()}
               </span>
             )}
           </div>

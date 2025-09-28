@@ -2,48 +2,59 @@
 export interface Board {
   id: string;
   name: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Column {
   id: string;
-  boardId: string;
+  board_id: string;
   name: string;
   position: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Card {
   id: string;
-  columnId: string;
+  column_id: string;
   title: string;
   description?: string;
-  dueDate?: string;
+  due_date?: string;
   priority: Priority;
+  status: Status;
   position: number;
-  createdAt: string;
-  updatedAt: string;
+  assignee_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+  board_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CardLabel {
   id: string;
-  cardId: string;
-  name: string;
-  color: LabelColor;
-  createdAt: string;
+  card_id: string;
+  label_id: string;
+  created_at: string;
 }
 
 export interface CardAssignee {
   id: string;
-  cardId: string;
-  userId: string;
-  assignedAt: string;
+  card_id: string;
+  user_id: string;
+  assigned_at: string;
 }
 
 // Enums
-export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Priority = 'P1' | 'P2' | 'P3';
+export type Status = 'not_started' | 'started' | 'ongoing' | 'in_progress' | 'completed';
 
 export type LabelColor = 
   | 'red' 
@@ -66,7 +77,8 @@ export interface BoardState {
   board: Board | null;
   columns: Column[];
   cards: Card[];
-  labels: CardLabel[];
+  labels: Label[];
+  cardLabels: CardLabel[];
   assignees: CardAssignee[];
   loading: boolean;
   error: string | null;
@@ -79,25 +91,28 @@ export interface ApiResponse<T> {
 }
 
 export interface CreateCardRequest {
-  columnId: string;
+  column_id: string;
   title: string;
   description?: string;
-  dueDate?: string;
+  due_date?: string;
   priority?: Priority;
+  status?: Status;
 }
 
 export interface UpdateCardRequest {
   id: string;
   title?: string;
   description?: string;
-  dueDate?: string;
+  due_date?: string;
   priority?: Priority;
-  columnId?: string;
+  status?: Status;
+  column_id?: string;
   position?: number;
+  assignee_id?: string;
 }
 
 export interface CreateColumnRequest {
-  boardId: string;
+  board_id: string;
   name: string;
   position: number;
 }

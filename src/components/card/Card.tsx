@@ -21,14 +21,12 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
 
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case 'low':
-        return { label: 'P3', className: 'priority-p3' };
-      case 'medium':
+      case 'P1':
+        return { label: 'P1', className: 'priority-p1' };
+      case 'P2':
         return { label: 'P2', className: 'priority-p2' };
-      case 'high':
-        return { label: 'P1', className: 'priority-p1' };
-      case 'critical':
-        return { label: 'P1', className: 'priority-p1' };
+      case 'P3':
+        return { label: 'P3', className: 'priority-p3' };
       default:
         return { label: 'P3', className: 'priority-p3' };
     }
@@ -55,7 +53,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     }
   };
 
-  const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
+  const isOverdue = card.due_date && new Date(card.due_date) < new Date();
   const priorityBadge = getPriorityBadge(card.priority);
   const statusBadge = getStatusBadge();
 
@@ -122,7 +120,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
       {/* Card Footer */}
       <div className="flex items-center justify-between">
         {/* Due Date */}
-        {card.dueDate && (
+        {card.due_date && (
           <span
             className={`text-xs px-2 py-1 rounded ${
               isOverdue
@@ -130,7 +128,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
                 : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {new Date(card.dueDate).toLocaleDateString()}
+            {new Date(card.due_date).toLocaleDateString()}
           </span>
         )}
 
