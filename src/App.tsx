@@ -20,7 +20,7 @@ import './styles/globals.css';
 
 function AppContent() {
   const dispatch = useAppDispatch();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
   
   // Board ID - you can change this as needed
   const boardId = '550e8400-e29b-41d4-a716-446655440000';
@@ -214,7 +214,7 @@ function AppContent() {
   const handleAddColumn = () => {
     debugLog.modal.open('create-column', { boardId });
     openModal(
-      <ColumnCreateModal boardId={boardId} onClose={() => {}} />,
+      <ColumnCreateModal boardId={boardId} onClose={closeModal} />,
       { title: 'Create New Column', size: 'md' }
     );
   };
@@ -222,7 +222,7 @@ function AppContent() {
   const handleEditColumn = (column: any) => {
     debugLog.modal.open('edit-column', { columnId: column.id, columnName: column.name });
     openModal(
-      <ColumnEditModal column={column} onClose={() => {}} />,
+      <ColumnEditModal column={column} onClose={closeModal} />,
       { title: 'Edit Column', size: 'md' }
     );
   };
@@ -232,7 +232,7 @@ function AppContent() {
     if (column) {
       debugLog.modal.open('delete-column', { columnId, columnName: column.name });
       openModal(
-        <ColumnDeleteModal columnId={columnId} columnName={column.name} onClose={() => {}} />,
+        <ColumnDeleteModal columnId={columnId} columnName={column.name} onClose={closeModal} />,
         { title: 'Delete Column', size: 'md' }
       );
     }

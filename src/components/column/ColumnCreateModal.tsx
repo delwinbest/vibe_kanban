@@ -65,7 +65,6 @@ const ColumnCreateModal: React.FC<ColumnCreateModalProps> = ({ boardId, onClose 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Create New Column</h3>
         <p className="text-sm text-gray-600">Add a new column to organize your tasks.</p>
       </div>
 
