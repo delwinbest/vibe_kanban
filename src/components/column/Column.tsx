@@ -1,5 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 // import { Card } from '../../types';
 import CardComponent from '../card/Card';
@@ -22,6 +24,10 @@ const Column: React.FC<ColumnProps> = ({
     isDragging,
   } = useSortable({ id: column.id });
 
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: column.id,
+  });
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -33,11 +39,14 @@ const Column: React.FC<ColumnProps> = ({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        setDroppableRef(node);
+      }}
       style={style}
       className={`kanban-column ${
         isDragging ? 'opacity-50' : ''
-      }`}
+      } ${isOver ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
       {...attributes}
     >
       {/* Column Header */}
@@ -89,25 +98,27 @@ const Column: React.FC<ColumnProps> = ({
             <p className="text-xs text-gray-400">Drop cards here or add a new one</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {columnCards.map((card) => (
-              <CardComponent
-                key={card.id}
-                card={card}
-                onEdit={(card) => {
-                  // TODO: Implement card editing
-                  console.log('Edit card:', card);
-                }}
-                onDelete={(cardId) => {
-                  // TODO: Implement card deletion
-                  console.log('Delete card:', cardId);
-                }}
-                onMove={(cardId, newColumnId, newPosition) => {
-                  onMoveCard(cardId, newColumnId, newPosition);
-                }}
-              />
-            ))}
-          </div>
+          <SortableContext items={columnCards.map(card => card.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-3">
+              {columnCards.map((card) => (
+                <CardComponent
+                  key={card.id}
+                  card={card}
+                  onEdit={(card) => {
+                    // TODO: Implement card editing
+                    console.log('Edit card:', card);
+                  }}
+                  onDelete={(cardId) => {
+                    // TODO: Implement card deletion
+                    console.log('Delete card:', cardId);
+                  }}
+                  onMove={(cardId, newColumnId, newPosition) => {
+                    onMoveCard(cardId, newColumnId, newPosition);
+                  }}
+                />
+              ))}
+            </div>
+          </SortableContext>
         )}
 
         {/* Add Card Button */}
