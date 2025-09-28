@@ -60,13 +60,31 @@ npm install
    # Supabase Configuration
    VITE_SUPABASE_URL=https://your-project-ref.supabase.co
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   
-   # MCP Configuration (for Cursor integration)
-   SUPABASE_PROJECT_REF=your_supabase_project_ref
-   SUPABASE_ACCESS_TOKEN=your_supabase_personal_access_token
    ```
 
-3. **Find your Supabase credentials:**
+3. **Set up MCP Configuration for Cursor integration:**
+   
+   Create a `.cursor/mcp.json` file in your project root:
+   ```json
+   {
+     "mcpServers": {
+       "supabase": {
+         "command": "npx",
+         "args": [
+           "-y",
+           "@supabase/mcp-server-supabase@latest",
+           "--read-only",
+           "--project-ref=your_supabase_project_ref"
+         ],
+         "env": {
+           "SUPABASE_ACCESS_TOKEN": "your_supabase_personal_access_token"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Find your Supabase credentials:**
    - **Project URL & Anon Key**: Supabase Dashboard → Project Settings → API
    - **Project Reference**: Supabase Dashboard → Project Settings → General → Reference ID
    - **Personal Access Token**: Supabase Dashboard → Account Settings → Access Tokens
@@ -230,6 +248,7 @@ src/
 
 ### Supabase MCP Integration
 - The MCP server is configured with `--read-only` flag for safety
+- MCP configuration is stored in `.cursor/mcp.json` (not in `.env`)
 - Use personal access tokens with minimal required permissions
 - Consider using service role keys only in secure environments
 - Review Supabase's security best practices for LLM integrations
