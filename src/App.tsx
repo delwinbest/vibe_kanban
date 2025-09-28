@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
