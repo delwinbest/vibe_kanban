@@ -287,11 +287,37 @@ src/
 
 ## Contributing
 
+### Branch Strategy
+- **`main`**: Production-ready code, stable releases
+- **`development`**: Integration branch for ongoing development
+- **`feature/*`**: Feature branches for new functionality
+
+### Development Workflow
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch from `development` (`git checkout -b feature/amazing-feature`)
+3. Make your changes and commit (`git commit -m 'Add some amazing feature'`)
+4. Push to your feature branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request to `development` branch
+6. After review and testing, merge to `development`
+7. When ready for release, merge `development` to `main`
+
+### Getting Started for Development
+```bash
+# Clone the repository
+git clone <repository-url>
+cd vibe-kanban
+
+# Switch to development branch
+git checkout development
+
+# Create your feature branch
+git checkout -b feature/your-feature-name
+
+# Make changes, commit, and push
+git add .
+git commit -m "feat: Add your feature"
+git push origin feature/your-feature-name
+```
 
 ## License
 
