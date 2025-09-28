@@ -18,13 +18,13 @@
 - **Drag & Drop Logic**: Complete implementation for cards and columns with state management
 
 ### 🚧 In Progress
-- **CRUD Operations**: Create, update, delete cards and columns
+- **Phase 6: Card Management** - CRUD operations for cards
 
 ### 🎯 Immediate Next Steps (Priority Order)
-1. **Implement CRUD Operations** - Create, update, delete cards and columns
-2. **User Assignment** - Card assignee functionality
-3. **Advanced Features** - Due dates, attachments, comments
-4. **Accessibility & Mobile** - Keyboard navigation and touch support
+1. **Phase 6: Card Management** - Add, edit, delete cards with forms and modals
+2. **Phase 7: Column Management** - CRUD operations for columns
+3. **User Assignment** - Card assignee functionality
+4. **Advanced Features** - Due dates, attachments, comments
 
 ### ✅ Completed Components
 - **Card Component** (`src/components/card/Card.tsx`) - Individual card display with drag functionality ✅
@@ -104,9 +104,9 @@
 
 ## Feature Implementation
 
-### Phase 6: Card Management
-- [ ] Implement add new card functionality
-- [ ] Create card creation modal/form
+### Phase 6: Card Management 🚧 IN PROGRESS
+- [x] Implement add new card functionality ✅
+- [x] Create card creation modal/form ✅
 - [ ] Add card title editing (in-place)
 - [ ] Implement card description editing
 - [ ] Add due date picker component

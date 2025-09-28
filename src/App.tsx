@@ -9,11 +9,13 @@ import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn } from './stor
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
-import { ModalProvider } from './components/ui/ModalProvider';
+import { ModalProvider, useModal } from './components/ui/ModalProvider';
+import CardCreateModal from './components/card/CardCreateModal';
 import './styles/globals.css';
 
-function App() {
+function AppContent() {
   const dispatch = useAppDispatch();
+  const { openModal } = useModal();
   
   // Board ID - you can change this as needed
   const boardId = '550e8400-e29b-41d4-a716-446655440000';
@@ -137,6 +139,16 @@ function App() {
     dispatch(endDrag());
   };
 
+  const handleAddCard = (columnId: string) => {
+    const column = columns.find(col => col.id === columnId);
+    if (column) {
+      openModal(
+        <CardCreateModal columnId={columnId} columnName={column.name} />,
+        { title: 'Create New Card', size: 'md' }
+      );
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -153,27 +165,33 @@ function App() {
   }
 
   return (
+    <DndContext
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <Board 
+        board={board}
+        columns={columns}
+        cards={cards}
+        onAddColumn={() => console.log('Add column')}
+        onEditColumn={(column) => console.log('Edit column:', column)}
+        onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
+        onAddCard={handleAddCard}
+        onEditCard={(card) => console.log('Edit card:', card)}
+        onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
+        onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
+        onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
+      />
+    </DndContext>
+  );
+}
+
+function App() {
+  return (
     <ErrorBoundary>
       <ModalProvider>
-        <DndContext
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <Board 
-            board={board}
-            columns={columns}
-            cards={cards}
-            onAddColumn={() => console.log('Add column')}
-            onEditColumn={(column) => console.log('Edit column:', column)}
-            onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
-            onAddCard={(columnId) => console.log('Add card to column:', columnId)}
-            onEditCard={(card) => console.log('Edit card:', card)}
-            onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
-            onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
-            onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
-          />
-        </DndContext>
+        <AppContent />
       </ModalProvider>
     </ErrorBoundary>
   );
