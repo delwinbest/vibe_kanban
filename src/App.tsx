@@ -5,7 +5,7 @@ import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns, reorderColumns } from './store/slices/columnSlice';
-import { fetchCards, moveCardBetweenColumns } from './store/slices/cardSlice';
+import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -67,21 +67,52 @@ function App() {
       
       if (overColumn) {
         // Card dropped on a column
-        const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
-        dispatch(moveCardBetweenColumns({
-          cardId: activeCard.id,
-          newColumnId: overColumn.id,
-          newPosition
-        }));
+        if (activeCard.column_id === overColumn.id) {
+          // Same column - reorder within column
+          const columnCards = cards.filter(card => card.column_id === overColumn.id).sort((a, b) => a.position - b.position);
+          const activeIndex = columnCards.findIndex(card => card.id === activeCard.id);
+          const newPosition = columnCards.length - 1; // Move to end
+          
+          if (activeIndex !== newPosition) {
+            dispatch(reorderCardsInColumn({
+              columnId: overColumn.id,
+              fromIndex: activeIndex,
+              toIndex: newPosition
+            }));
+          }
+        } else {
+          // Different column - move between columns
+          const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
+          dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: overColumn.id,
+            newPosition
+          }));
+        }
       } else if (overCard) {
         // Card dropped on another card
         const targetColumnId = overCard.column_id;
-        const targetPosition = cards.findIndex(card => card.id === overCard.id);
-        dispatch(moveCardBetweenColumns({
-          cardId: activeCard.id,
-          newColumnId: targetColumnId,
-          newPosition: targetPosition
-        }));
+        const targetColumnCards = cards.filter(card => card.column_id === targetColumnId).sort((a, b) => a.position - b.position);
+        const targetPosition = targetColumnCards.findIndex(card => card.id === overCard.id);
+        
+        if (activeCard.column_id === targetColumnId) {
+          // Same column - reorder within column
+          const activeIndex = targetColumnCards.findIndex(card => card.id === activeCard.id);
+          if (activeIndex !== targetPosition) {
+            dispatch(reorderCardsInColumn({
+              columnId: targetColumnId,
+              fromIndex: activeIndex,
+              toIndex: targetPosition
+            }));
+          }
+        } else {
+          // Different column - move between columns
+          dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: targetColumnId,
+            newPosition: targetPosition
+          }));
+        }
       }
     } else if (activeColumn) {
       // Handle column drag
