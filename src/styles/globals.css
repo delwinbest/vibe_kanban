@@ -10,35 +10,99 @@
   body {
     @apply bg-gray-50 text-gray-900;
   }
+  
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+  
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  *::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  *::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
 }
 
 @layer components {
   .kanban-board {
-    @apply min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100;
+    @apply min-h-screen bg-gray-50;
   }
   
   .kanban-column {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 min-h-[500px] w-80;
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 min-h-[600px] w-80 flex-shrink-0;
   }
   
   .kanban-card {
-    @apply bg-white rounded-md shadow-sm border border-gray-200 p-3 mb-2 cursor-pointer hover:shadow-md transition-shadow duration-200;
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-gray-300;
   }
   
   .kanban-card:hover {
-    @apply border-gray-300;
+    @apply border-gray-300 shadow-md;
   }
   
   .kanban-card.dragging {
-    @apply opacity-50 rotate-2 scale-105;
+    @apply opacity-50 rotate-1 scale-105 shadow-lg;
   }
   
   .kanban-dropzone {
-    @apply border-2 border-dashed border-gray-300 rounded-md p-4 text-center text-gray-500;
+    @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 hover:border-gray-400 hover:bg-gray-50 transition-all duration-200;
   }
   
   .kanban-dropzone.drag-over {
     @apply border-blue-400 bg-blue-50 text-blue-600;
+  }
+  
+  .priority-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .priority-p1 {
+    @apply bg-red-100 text-red-800 border border-red-200;
+  }
+  
+  .priority-p2 {
+    @apply bg-orange-100 text-orange-800 border border-orange-200;
+  }
+  
+  .priority-p3 {
+    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+  }
+  
+  .status-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-started {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .status-ongoing {
+    @apply bg-purple-100 text-purple-800;
+  }
+  
+  .status-in-progress {
+    @apply bg-indigo-100 text-indigo-800;
+  }
+  
+  .status-completed {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .status-not-started {
+    @apply bg-gray-100 text-gray-800;
   }
   
   .btn-primary {

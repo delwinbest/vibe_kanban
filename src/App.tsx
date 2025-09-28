@@ -7,7 +7,6 @@ import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns } from './store/slices/columnSlice';
 import { fetchCards } from './store/slices/cardSlice';
-import Header from './components/ui/Header';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -70,30 +69,25 @@ function App() {
   return (
     <ErrorBoundary>
       <ModalProvider>
-        <div className="kanban-board min-h-screen">
-          <DndContext
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
-            <Header board={board} />
-            <main className="container mx-auto px-4 py-8">
-              <Board 
-                board={board}
-                columns={columns}
-                cards={cards}
-                onAddColumn={() => console.log('Add column')}
-                onEditColumn={(column) => console.log('Edit column:', column)}
-                onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
-                onAddCard={(columnId) => console.log('Add card to column:', columnId)}
-                onEditCard={(card) => console.log('Edit card:', card)}
-                onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
-                onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
-                onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
-              />
-            </main>
-          </DndContext>
-        </div>
+        <DndContext
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <Board 
+            board={board}
+            columns={columns}
+            cards={cards}
+            onAddColumn={() => console.log('Add column')}
+            onEditColumn={(column) => console.log('Edit column:', column)}
+            onDeleteColumn={(columnId) => console.log('Delete column:', columnId)}
+            onAddCard={(columnId) => console.log('Add card to column:', columnId)}
+            onEditCard={(card) => console.log('Edit card:', card)}
+            onDeleteCard={(cardId) => console.log('Delete card:', cardId)}
+            onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
+            onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
+          />
+        </DndContext>
       </ModalProvider>
     </ErrorBoundary>
   );

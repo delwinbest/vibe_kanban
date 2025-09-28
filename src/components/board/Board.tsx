@@ -96,41 +96,101 @@ const Board: React.FC<BoardProps> = ({
   };
 
   return (
-    <div className="board-container">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">{board.name}</h1>
-        <p className="text-gray-600 mt-2">Manage your tasks with drag and drop</p>
-      </div>
-      
-      <div className="flex gap-6 overflow-x-auto pb-4">
-        {columns.length === 0 ? (
-          <div className="text-center py-12 w-full">
-            <h3 className="text-xl font-semibold text-gray-600 mb-4">No Columns Yet</h3>
-            <p className="text-gray-500 mb-6">Create your first column to start organizing tasks.</p>
+    <div className="kanban-board min-h-screen bg-gray-50">
+      {/* Board Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {board.name}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage your tasks and projects efficiently
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">Public To All</span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
+              Export Board
+            </button>
+            <button className="px-3 py-1.5 text-gray-600 hover:text-gray-900 text-sm rounded-md hover:bg-gray-100 transition-colors">
+              Import Board
+            </button>
             <button 
-              onClick={handleAddColumn}
-              className="btn-primary"
+              onClick={onAddColumn}
+              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
             >
-              Add First Column
+              Add Column
+            </button>
+            <button className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors">
+              Share
             </button>
           </div>
-        ) : (
-          <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
-            {[...columns]
-              .sort((a, b) => a.position - b.position)
-              .map((column) => (
-                <ColumnComponent
-                  key={column.id}
-                  column={column}
-                  cards={cards}
-                  onAddCard={handleAddCard}
-                  onEditColumn={handleEditColumn}
-                  onDeleteColumn={handleDeleteColumn}
-                  onMoveCard={handleMoveCard}
-                />
-              ))}
-          </SortableContext>
-        )}
+        </div>
+      </div>
+
+      {/* View Options */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-1">
+            <button className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-md">
+              List
+            </button>
+            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+              Board
+            </button>
+            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+              Timeline
+            </button>
+            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+              Calendar
+            </button>
+            <button className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md">
+              Progress
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Board Content */}
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex gap-6 overflow-x-auto pb-4">
+            {columns.length === 0 ? (
+              <div className="text-center py-12 w-full">
+                <h3 className="text-xl font-semibold text-gray-600 mb-4">No Columns Yet</h3>
+                <p className="text-gray-500 mb-6">Create your first column to start organizing tasks.</p>
+                <button 
+                  onClick={handleAddColumn}
+                  className="btn-primary"
+                >
+                  Add First Column
+                </button>
+              </div>
+            ) : (
+              <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
+                {[...columns]
+                  .sort((a, b) => a.position - b.position)
+                  .map((column) => (
+                    <ColumnComponent
+                      key={column.id}
+                      column={column}
+                      cards={cards}
+                      onAddCard={handleAddCard}
+                      onEditColumn={handleEditColumn}
+                      onDeleteColumn={handleDeleteColumn}
+                      onMoveCard={handleMoveCard}
+                    />
+                  ))}
+              </SortableContext>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

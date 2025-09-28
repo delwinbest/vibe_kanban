@@ -19,28 +19,51 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
     transition,
   };
 
-  const getPriorityColor = (priority: Priority) => {
+  const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
       case 'low':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return { label: 'P3', className: 'priority-p3' };
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return { label: 'P2', className: 'priority-p2' };
       case 'high':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return { label: 'P1', className: 'priority-p1' };
       case 'critical':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return { label: 'P1', className: 'priority-p1' };
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return { label: 'P3', className: 'priority-p3' };
+    }
+  };
+
+  const getStatusBadge = () => {
+    // This would come from card status in a real app
+    const statuses = ['Started', 'Ongoing', 'In Progress', 'Completed', 'Not Started'];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    switch (randomStatus) {
+      case 'Started':
+        return { label: 'Started', className: 'status-started' };
+      case 'Ongoing':
+        return { label: 'Ongoing', className: 'status-ongoing' };
+      case 'In Progress':
+        return { label: 'In Progress', className: 'status-in-progress' };
+      case 'Completed':
+        return { label: 'Completed', className: 'status-completed' };
+      case 'Not Started':
+        return { label: 'Not Started', className: 'status-not-started' };
+      default:
+        return { label: 'Not Started', className: 'status-not-started' };
     }
   };
 
   const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
+  const priorityBadge = getPriorityBadge(card.priority);
+  const statusBadge = getStatusBadge();
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`kanban-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-grab active:cursor-grabbing hover:shadow-md transition-all duration-200 ${
+      className={`kanban-card group ${
         isDragging ? 'opacity-50 shadow-lg' : ''
       }`}
       {...attributes}
@@ -48,16 +71,16 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
     >
       {/* Card Header */}
       <div className="flex items-start justify-between mb-3">
-        <h4 className="font-medium text-gray-800 text-sm leading-tight flex-1 pr-2">
+        <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1 pr-2">
           {card.title}
         </h4>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEdit(card);
             }}
-            className="p-1 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
             title="Edit card"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +92,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
               e.stopPropagation();
               onDelete(card.id);
             }}
-            className="p-1 text-gray-400 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
             title="Delete card"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,17 +109,18 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
         </p>
       )}
 
+      {/* Status and Priority Badges */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className={`status-badge ${statusBadge.className}`}>
+          {statusBadge.label}
+        </span>
+        <span className={`priority-badge ${priorityBadge.className}`}>
+          {priorityBadge.label}
+        </span>
+      </div>
+
       {/* Card Footer */}
       <div className="flex items-center justify-between">
-        {/* Priority Badge */}
-        <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(
-            card.priority
-          )}`}
-        >
-          {card.priority}
-        </span>
-
         {/* Due Date */}
         {card.dueDate && (
           <span
@@ -109,15 +133,13 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove }) => {
             {new Date(card.dueDate).toLocaleDateString()}
           </span>
         )}
-      </div>
 
-      {/* Card Metadata */}
-      <div className="mt-3 pt-2 border-t border-gray-100">
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>Created {new Date(card.createdAt).toLocaleDateString()}</span>
-          {card.updatedAt !== card.createdAt && (
-            <span>Updated {new Date(card.updatedAt).toLocaleDateString()}</span>
-          )}
+        {/* User Avatar Placeholder */}
+        <div className="flex items-center gap-1">
+          <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+            <span className="text-xs text-gray-600 font-medium">U</span>
+          </div>
+          <span className="text-xs text-gray-500">2</span>
         </div>
       </div>
     </div>
