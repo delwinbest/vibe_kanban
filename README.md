@@ -4,24 +4,39 @@ A modern Trello-style kanban board application built with React, TypeScript, and
 
 ## Features
 
-- 🎯 **Drag & Drop Interface**: Smooth card movement between columns using @dnd-kit
-- 🔄 **Real-time Collaboration**: Live updates using Supabase real-time subscriptions ✅
-- 📋 **Comprehensive Card Management**: Cards with titles, descriptions, due dates, labels, priorities, and assignees
-- 📊 **Column Management**: Add, rename, delete, and reorder columns
-- 📱 **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- 💾 **Data Persistence**: Auto-save with Supabase backend and offline support
+### ✅ Implemented Features
+- 🎯 **Drag & Drop Interface**: Complete card and column drag-and-drop using @dnd-kit
+- 🔄 **Real-time Collaboration**: Live updates using Supabase real-time subscriptions
+- 📋 **Comprehensive Card Management**: Full CRUD operations with in-place editing
+  - Card creation, editing, and deletion with modals
+  - In-place editing for title, description, due date, and priority
+  - Priority badges (P1, P2, P3) and status indicators
+  - Card search functionality
+- 🎨 **Modern UI Design**: Clean, professional interface with consolidated header
+- 📱 **Responsive Design**: Mobile-first responsive layout
+- 💾 **Data Persistence**: Supabase backend with Redux state management
+- 🔧 **Modal System**: Complete modal system for card operations
+
+### 🚧 In Development
+- 📊 **Column Management**: CRUD operations for columns (Phase 7)
+
+### 📋 Planned Features
 - 📤 **Import/Export**: JSON and CSV data management capabilities
-- 🎨 **Modern UI Design**: Clean, professional interface with priority badges (P1, P2, P3) and status indicators
-- 🔧 **Consolidated Header**: Single header with all board management functionality
+- 👥 **User Assignment**: Card assignee functionality
+- 🏷️ **Label System**: Advanced labeling and filtering
+- 🔍 **Advanced Search**: Filter by labels, assignees, due dates
+- 📊 **Analytics**: Board usage statistics and insights
 
 ## Technology Stack
 
-- **Frontend**: React 18+ with Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Redux Toolkit
-- **Drag & Drop**: @dnd-kit packages
-- **Backend**: Supabase (Database, Real-time, Auth)
-- **Language**: TypeScript
+- **Frontend**: React 19.1.1 with Vite 4.5.0
+- **Styling**: Tailwind CSS 3.4.17 with custom design system
+- **State Management**: Redux Toolkit 2.9.0
+- **Drag & Drop**: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- **Backend**: Supabase (PostgreSQL, Real-time subscriptions, Auth)
+- **Language**: TypeScript 5.9.2
+- **Build Tool**: Vite with TypeScript compilation
+- **Package Manager**: npm
 
 ## Prerequisites
 
@@ -185,26 +200,27 @@ The application will be available at `http://localhost:3000`.
 
 ## Real-time Features
 
-### Real-time Subscriptions
+### ✅ Implemented Real-time Subscriptions
 The application includes comprehensive real-time functionality powered by Supabase:
 
-- **Board Changes**: Live updates when board names or settings change
-- **Column Management**: Real-time column creation, updates, and deletion
-- **Card Operations**: Instant updates for card moves, edits, and status changes
-- **Automatic Cleanup**: Subscriptions are properly managed and cleaned up on component unmount
+- **Card Operations**: Live updates for card creation, editing, deletion, and moves
+- **Column Changes**: Real-time column updates and reordering
+- **Board Updates**: Live board name and setting changes
+- **Optimistic Updates**: Immediate UI feedback with server reconciliation
+- **Automatic Cleanup**: Subscriptions are properly managed and cleaned up
 
 ### Subscription Management
-- **Smart Filtering**: Subscriptions are filtered by board ID for optimal performance
+- **Smart Filtering**: Subscriptions filtered by board ID for optimal performance
 - **Connection Management**: Automatic reconnection and error handling
 - **Memory Efficient**: Proper cleanup prevents memory leaks
-- **Debug Logging**: Console logs help track subscription status and changes
+- **Debug Logging**: Comprehensive logging for development and debugging
 
 ### Testing Real-time Features
 To test real-time functionality:
 1. Open the application in multiple browser tabs
 2. Make changes in one tab (edit cards, move items, etc.)
 3. Observe live updates in other tabs
-4. Check browser console for subscription logs
+4. Check browser console for subscription logs and debug information
 
 ## Available Scripts
 
@@ -221,49 +237,53 @@ To test real-time functionality:
 ```
 src/
 ├── components/
-│   ├── ui/           # Reusable UI components (Header, Modal, LoadingSpinner, ErrorBoundary)
-│   ├── board/        # Board-related components
-│   ├── column/       # Column components ✅
-│   └── card/         # Card components ✅
+│   ├── ui/           # Reusable UI components (Modal, LoadingSpinner, ErrorBoundary, ModalProvider)
+│   ├── board/        # Board component with consolidated header and search
+│   ├── column/       # Column component with drag-and-drop support
+│   └── card/         # Card components (Card, CardCreateModal, CardDeleteModal, CardDetailModal)
 ├── store/
-│   ├── slices/       # Redux slices (board, column, card, ui)
+│   ├── slices/       # Redux slices (board, column, card, label, ui)
+│   ├── selectors.ts  # Comprehensive selectors for derived state
 │   └── index.ts      # Store configuration
 ├── services/
-│   └── supabase.ts   # Supabase client with real-time subscriptions
+│   └── supabase.ts   # Supabase client configuration
 ├── types/
-│   └── index.ts      # TypeScript type definitions
+│   └── index.ts      # TypeScript type definitions matching database schema
 ├── hooks/
 │   ├── redux.ts      # Custom Redux hooks
-│   └── useRealtimeSubscriptions.ts # Real-time subscription hook
+│   └── useRealtimeSubscriptions.ts # Real-time subscription management
 ├── utils/
+│   ├── debug.ts      # Debug logging utility
 │   └── index.ts      # Utility functions
 └── styles/
-    └── globals.css   # Global styles
+    └── globals.css   # Global styles with modern design system
 ```
 
 ## Development Guidelines
 
 ### Code Style
 
-- Use TypeScript for all code
-- Follow React functional component patterns
-- Use Redux Toolkit for state management
-- Implement proper error boundaries
-- Write accessible components with ARIA labels
+- Use TypeScript 5.9.2 for all code with strict type checking
+- Follow React 19 functional component patterns with hooks
+- Use Redux Toolkit 2.9.0 for centralized state management
+- Implement proper error boundaries and error handling
+- Write accessible components with ARIA labels and keyboard navigation
 
 ### Component Structure
 
 - Break down components into smaller, reusable parts
-- Use custom hooks for complex logic
-- Implement proper prop typing
+- Use custom hooks for complex logic (useRealtimeSubscriptions, redux hooks)
+- Implement proper prop typing with TypeScript interfaces
 - Follow the container/presentational component pattern
+- Use React.memo for performance optimization
 
 ### State Management
 
-- Use Redux Toolkit slices for organized state
+- Use Redux Toolkit slices for organized state (board, column, card, label, ui)
 - Implement optimistic updates for better UX
 - Handle loading and error states properly
-- Use selectors for derived state
+- Use comprehensive selectors for derived state
+- Implement real-time subscriptions with proper cleanup
 
 ## Security Considerations
 
@@ -289,17 +309,22 @@ src/
 
 ### Branch Strategy
 - **`main`**: Production-ready code, stable releases
-- **`development`**: Integration branch for ongoing development
+- **`development`**: Integration branch for ongoing development (current branch)
 - **`feature/*`**: Feature branches for new functionality
+- **`fix/*`**: Bug fix branches for issues and problems
 
 ### Development Workflow
-1. Fork the repository
-2. Create a feature branch from `development` (`git checkout -b feature/amazing-feature`)
-3. Make your changes and commit (`git commit -m 'Add some amazing feature'`)
-4. Push to your feature branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request to `development` branch
-6. After review and testing, merge to `development`
-7. When ready for release, merge `development` to `main`
+1. Create a feature branch from `development` (`git checkout -b feature/phase-X-description`)
+2. Make your changes and commit with conventional commit messages
+3. Push to your feature branch (`git push origin feature/phase-X-description`)
+4. Open a Pull Request to `development` branch
+5. After review and testing, merge to `development`
+6. When ready for release, merge `development` to `main`
+
+### Current Development Status
+- **Current Branch**: `fix/page-reload-on-card-operations`
+- **Current Phase**: Phase 7 - Column Management
+- **Last Updated**: January 2025
 
 ### Getting Started for Development
 ```bash
@@ -331,21 +356,37 @@ If you encounter any issues or have questions, please:
 2. Create a new issue with detailed information
 3. Include steps to reproduce the problem
 
-## Roadmap
+## Project Status & Roadmap
 
-- [x] Real-time collaboration and live updates ✅
-- [x] Basic UI components (Card, Column, Modal) ✅
-- [x] Modern UI design with priority badges and status indicators ✅
-- [x] Consolidated header with board management functionality ✅
-- [ ] Drag & drop functionality
-- [ ] CRUD operations for cards and columns
-- [ ] Multiple board support
-- [ ] User authentication and authorization
-- [ ] Advanced filtering and search
-- [ ] Board templates
-- [ ] Third-party integrations
-- [ ] Mobile app development
-- [ ] Advanced analytics and reporting
+### ✅ Completed (Phases 1-6)
+- [x] **Project Setup**: Vite + React + TypeScript + Tailwind CSS
+- [x] **Database Schema**: Complete Supabase schema with RLS policies
+- [x] **Redux Store**: Complete store setup with all slices
+- [x] **Core Components**: Board, Column, Card, Modal system
+- [x] **Drag & Drop**: Complete card and column drag-and-drop functionality
+- [x] **Card Management**: Full CRUD operations with in-place editing
+- [x] **Real-time Features**: Supabase real-time subscriptions
+- [x] **Modern UI**: Priority badges, status indicators, responsive design
+- [x] **Search Functionality**: Card search with real-time filtering
+
+### 🚧 Current Development (Phase 7)
+- [ ] **Column Management**: CRUD operations for columns
+  - [ ] Add new column functionality
+  - [ ] Column name editing (in-place)
+  - [ ] Column deletion with confirmation
+  - [ ] Column reordering
+
+### 📋 Upcoming Features (Phases 8+)
+- [ ] **Label System**: Advanced labeling and color coding
+- [ ] **User Assignment**: Card assignee functionality
+- [ ] **Import/Export**: JSON and CSV data management
+- [ ] **Advanced Search**: Filter by labels, assignees, due dates
+- [ ] **Multiple Board Support**: Multi-board management
+- [ ] **User Authentication**: Supabase Auth integration
+- [ ] **Board Templates**: Pre-configured board layouts
+- [ ] **Analytics**: Usage statistics and insights
+- [ ] **Mobile App**: Native mobile applications
+- [ ] **API Access**: Public API for integrations
 
 ---
 
