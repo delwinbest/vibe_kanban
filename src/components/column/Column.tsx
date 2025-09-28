@@ -12,7 +12,9 @@ const Column: React.FC<ColumnProps> = ({
   cards, 
   onAddCard, 
   onEditColumn, 
-  onDeleteColumn, 
+  onDeleteColumn,
+  onEditCard,
+  onDeleteCard,
   onMoveCard 
 }) => {
   const {
@@ -104,14 +106,8 @@ const Column: React.FC<ColumnProps> = ({
                 <CardComponent
                   key={card.id}
                   card={card}
-                  onEdit={(card) => {
-                    // TODO: Implement card editing
-                    console.log('Edit card:', card);
-                  }}
-                  onDelete={(cardId) => {
-                    // TODO: Implement card deletion
-                    console.log('Delete card:', cardId);
-                  }}
+                  onEdit={onEditCard || (() => {})}
+                  onDelete={onDeleteCard || (() => {})}
                   onMove={(cardId, newColumnId, newPosition) => {
                     onMoveCard(cardId, newColumnId, newPosition);
                   }}

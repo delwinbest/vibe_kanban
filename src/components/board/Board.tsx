@@ -25,8 +25,8 @@ const Board: React.FC<BoardProps> = ({
   onEditColumn,
   onDeleteColumn,
   onAddCard,
-  onEditCard: _onEditCard,
-  onDeleteCard: _onDeleteCard,
+  onEditCard,
+  onDeleteCard,
   onMoveCard,
   onMoveColumn: _onMoveColumn
 }) => {
@@ -187,6 +187,8 @@ const Board: React.FC<BoardProps> = ({
                       onAddCard={handleAddCard}
                       onEditColumn={handleEditColumn}
                       onDeleteColumn={handleDeleteColumn}
+                      onEditCard={onEditCard}
+                      onDeleteCard={onDeleteCard}
                       onMoveCard={handleMoveCard}
                     />
                   ))}
