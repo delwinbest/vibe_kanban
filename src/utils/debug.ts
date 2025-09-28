@@ -95,7 +95,18 @@ export const debugLog = {
         console.log('❌ [API ERROR]', { action, error });
       }
     }
-  }
+  },
+  // Add other categories as needed
+  general: (message: string, data?: any) => {
+    if (isDevelopment) {
+      console.log(
+        `%c💡 [DEBUG] %c${message}`,
+        'font-weight: bold; color: #3B82F6;',
+        'font-weight: normal; color: #1F2937;',
+        data ? data : ''
+      );
+    }
+  },
 };
 
 export default debugLog;

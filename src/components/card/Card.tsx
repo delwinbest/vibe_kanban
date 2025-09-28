@@ -3,14 +3,24 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Priority } from '../../types';
 import { CardProps } from '../../types';
+import { useModal } from '../ui/ModalProvider';
+import CardDetailModal from './CardDetailModal';
+import { debugLog } from '../../utils/debug';
 
 const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) => {
+  const { openModal } = useModal();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingDueDate, setIsEditingDueDate] = useState(false);
+  const [isEditingPriority, setIsEditingPriority] = useState(false);
   const [titleValue, setTitleValue] = useState(card.title);
   const [descriptionValue, setDescriptionValue] = useState(card.description || '');
+  const [dueDateValue, setDueDateValue] = useState(card.due_date || '');
+  const [priorityValue, setPriorityValue] = useState(card.priority);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const dueDateInputRef = useRef<HTMLInputElement>(null);
+  const prioritySelectRef = useRef<HTMLSelectElement>(null);
   
   const {
     attributes,
@@ -30,7 +40,9 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
   useEffect(() => {
     setTitleValue(card.title);
     setDescriptionValue(card.description || '');
-  }, [card.title, card.description]);
+    setDueDateValue(card.due_date || '');
+    setPriorityValue(card.priority);
+  }, [card.title, card.description, card.due_date, card.priority]);
 
   // Focus input when editing starts
   useEffect(() => {
@@ -46,6 +58,19 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
       descriptionTextareaRef.current.select();
     }
   }, [isEditingDescription]);
+
+  useEffect(() => {
+    if (isEditingDueDate && dueDateInputRef.current) {
+      dueDateInputRef.current.focus();
+      dueDateInputRef.current.select();
+    }
+  }, [isEditingDueDate]);
+
+  useEffect(() => {
+    if (isEditingPriority && prioritySelectRef.current) {
+      prioritySelectRef.current.focus();
+    }
+  }, [isEditingPriority]);
 
   const handleTitleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -101,6 +126,58 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     }
   };
 
+  const handleDueDateClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingDueDate(true);
+  };
+
+  const handleDueDateSubmit = () => {
+    const newDueDate = dueDateValue.trim() || undefined;
+    if (newDueDate !== card.due_date) {
+      onEdit({ ...card, due_date: newDueDate });
+    }
+    setIsEditingDueDate(false);
+  };
+
+  const handleDueDateCancel = () => {
+    setDueDateValue(card.due_date || '');
+    setIsEditingDueDate(false);
+  };
+
+  const handleDueDateKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleDueDateSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleDueDateCancel();
+    }
+  };
+
+  const handlePriorityClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingPriority(true);
+  };
+
+  const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPriority = e.target.value as Priority;
+    setPriorityValue(newPriority);
+    onEdit({ ...card, priority: newPriority });
+    setIsEditingPriority(false);
+  };
+
+  const handlePriorityCancel = () => {
+    setPriorityValue(card.priority);
+    setIsEditingPriority(false);
+  };
+
+  const handlePriorityKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      handlePriorityCancel();
+    }
+  };
+
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
       case 'P1':
@@ -134,14 +211,33 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
   const priorityBadge = getPriorityBadge(card.priority);
   const statusBadge = getStatusBadge(card.status);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't open detail view if clicking on interactive elements
+    if (
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('input') ||
+      (e.target as HTMLElement).closest('textarea') ||
+      (e.target as HTMLElement).closest('select')
+    ) {
+      return;
+    }
+    
+    debugLog.modal.open('card-detail', { cardId: card.id, cardTitle: card.title });
+    openModal(
+      <CardDetailModal card={card} />,
+      { title: 'Card Details', size: 'lg' }
+    );
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`kanban-card group ${
+      className={`kanban-card group cursor-pointer ${
         isDragging ? 'opacity-50 shadow-lg' : ''
       }`}
       {...attributes}
+      onClick={handleCardClick}
     >
       {/* Card Header */}
       <div className="flex items-start justify-between mb-3">
@@ -231,24 +327,63 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
         <span className={`status-badge ${statusBadge.className}`}>
           {statusBadge.label}
         </span>
-        <span className={`priority-badge ${priorityBadge.className}`}>
-          {priorityBadge.label}
-        </span>
+        {isEditingPriority ? (
+          <select
+            ref={prioritySelectRef}
+            value={priorityValue}
+            onChange={handlePriorityChange}
+            onBlur={handlePriorityCancel}
+            onKeyDown={handlePriorityKeyDown}
+            className="text-xs px-2 py-1 rounded border border-gray-300 bg-white"
+            style={{ minHeight: '1.5rem' }}
+          >
+            <option value="P1">P1 - High</option>
+            <option value="P2">P2 - Medium</option>
+            <option value="P3">P3 - Low</option>
+          </select>
+        ) : (
+          <span 
+            className={`priority-badge ${priorityBadge.className} cursor-pointer hover:opacity-80 transition-opacity`}
+            onClick={handlePriorityClick}
+            title="Click to change priority"
+          >
+            {priorityBadge.label}
+          </span>
+        )}
       </div>
 
       {/* Card Footer */}
       <div className="flex items-center justify-between">
         {/* Due Date */}
-        {card.due_date && (
-          <span
-            className={`text-xs px-2 py-1 rounded ${
-              isOverdue
-                ? 'bg-red-100 text-red-800'
-                : 'bg-gray-100 text-gray-600'
+        {isEditingDueDate ? (
+          <input
+            ref={dueDateInputRef}
+            type="date"
+            value={dueDateValue}
+            onChange={(e) => setDueDateValue(e.target.value)}
+            onBlur={handleDueDateSubmit}
+            onKeyDown={handleDueDateKeyDown}
+            className="text-xs px-2 py-1 rounded border border-gray-300 bg-white"
+            style={{ minHeight: '1.5rem' }}
+          />
+        ) : (
+          <div
+            className={`text-xs px-2 py-1 rounded cursor-pointer hover:bg-gray-50 transition-colors ${
+              card.due_date
+                ? isOverdue
+                  ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
             }`}
+            onClick={handleDueDateClick}
+            title="Click to edit due date"
           >
-            {new Date(card.due_date).toLocaleDateString()}
-          </span>
+            {card.due_date ? (
+              new Date(card.due_date).toLocaleDateString()
+            ) : (
+              <span className="italic">Add due date...</span>
+            )}
+          </div>
         )}
 
         {/* User Avatar Placeholder */}
