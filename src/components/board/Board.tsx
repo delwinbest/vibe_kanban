@@ -234,7 +234,7 @@ const Board: React.FC<BoardProps> = ({
       )}
 
       {/* Board Content */}
-      <div className="p-6">
+      <div className="px-6 pb-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-6 overflow-x-auto pb-4">
             {columns.length === 0 ? (
