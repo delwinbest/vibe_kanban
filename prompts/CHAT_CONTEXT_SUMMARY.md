@@ -1,247 +1,266 @@
 # Vibe Kanban - Chat Context Summary
 
 ## Project Overview
-**Vibe Kanban** is a modern Trello-style kanban board application built with React, TypeScript, Vite, Redux Toolkit, and Supabase. The project features drag-and-drop functionality, real-time data synchronization, and a responsive design using Tailwind CSS.
+**Vibe Kanban** is a modern Trello-style kanban board application built with React 19.1.1, TypeScript 5.9.2, Vite 4.5.0, Redux Toolkit 2.9.0, and Supabase. The project features drag-and-drop functionality, real-time data synchronization, responsive design with Tailwind CSS 3.4.17, and comprehensive accessibility support.
 
-## Technical Stack
-- **Frontend**: React 19.1.1 + TypeScript + Vite 4.5.0
-- **State Management**: Redux Toolkit with slices for board, columns, cards, and UI
-- **Styling**: Tailwind CSS v3.4.0 with custom design system
+## Technical Stack (Updated)
+- **Frontend**: React 19.1.1 + TypeScript 5.9.2 + Vite 4.5.0
+- **State Management**: Redux Toolkit 2.9.0 with slices for board, columns, cards, labels, and UI
+- **Styling**: Tailwind CSS 3.4.17 with custom design system
 - **Backend**: Supabase (PostgreSQL database + real-time subscriptions)
-- **Drag & Drop**: @dnd-kit library
-- **Development**: ESLint, Prettier, TypeScript strict mode
+- **Drag & Drop**: @dnd-kit library with touch support and keyboard navigation
+- **Development**: ESLint, Prettier, TypeScript strict mode with GitHub Actions CI/CD
 
-## Completed Work Summary
+## Development Status Summary
 
-### 1. Project Initialization & Setup ✅
-- Created Vite + React + TypeScript project structure
-- Configured package.json with all necessary dependencies
-- Set up ESLint, Prettier, and TypeScript configuration
-- Created proper folder structure following best practices
+### ✅ Completed Phases (1-7)
 
-### 2. Database Schema & Supabase Integration ✅
-- **Database Schema**: Complete PostgreSQL schema with tables:
-  - `boards` - Main kanban boards
-  - `columns` - Board columns (To Do, In Progress, Done)
-  - `cards` - Task cards with metadata
-  - `card_labels` - Label system for cards
-  - `card_assignees` - User assignment system
-- **Sample Data**: Populated with test data including 1 board, 3 columns, 3 cards
-- **RLS Policies**: Row Level Security configured for data protection
-- **MCP Integration**: Supabase MCP server configured for database management
-- **Real-time Subscriptions**: Live updates for boards, columns, and cards
+#### Phase 1: Project Initialization ✅
+- Vite + React + TypeScript project structure
+- Tailwind CSS configuration and custom design system
+- Package.json with all dependencies
+- ESLint, Prettier, and TypeScript setup
+- Git repository and initial commit
 
-### 3. Redux Store Architecture ✅
-- **Board Slice**: Manages board state, fetching, and real-time subscriptions
-- **Column Slice**: Handles column CRUD operations and real-time updates
-- **Card Slice**: Manages card operations, filtering, and real-time updates
-- **Label Slice**: Complete label system with CRUD operations and real-time subscriptions
-- **UI Slice**: Drag-and-drop state management and modal state
-- **Selectors**: Comprehensive selectors for derived state and data transformation
-- **Optimistic Updates**: Immediate UI feedback with rollback on failure
-- **Data Transformation**: Converts database snake_case to frontend format
-- **Error Handling**: Comprehensive error handling with user-friendly messages
-- **Real-time Integration**: Redux actions for handling live data updates
+#### Phase 2: Database Setup ✅
+- Complete Supabase PostgreSQL schema with RLS policies
+- Tables: `boards`, `columns`, `cards`, `card_labels`, `card_assignees`
+- Database indexes for performance
+- Real-time subscriptions configured
+- Sample data populated
 
-### 4. Core Components ✅
-- **App.tsx**: Main application with real-time subscriptions and modal provider
-- **Board.tsx**: Renders kanban board with consolidated floating header
-- **Column.tsx**: Column component with modern styling and card management
-- **Card.tsx**: Individual card component with priority badges and status indicators
-- **Modal.tsx**: Generic modal component for forms and dialogs
-- **ModalProvider.tsx**: Context provider for modal state management
-- **LoadingSpinner.tsx**: Loading state component
-- **ErrorBoundary.tsx**: Error handling component
+#### Phase 3: Basic UI Components ✅
+- App component structure with modal provider
+- Board component with consolidated header
+- Column component with modern styling
+- Card component with priority badges (P1, P2, P3) and status indicators
+- Modal system with provider and context
+- Loading states and error boundaries
 
-### 5. Redux Store & State Management ✅
-- **Complete Store Setup**: All slices implemented with proper TypeScript types
-- **Label System**: Full CRUD operations for labels and card-label assignments
-- **Selectors**: Comprehensive selectors for derived state, filtering, and statistics
-- **Optimistic Updates**: Immediate UI feedback with automatic rollback on errors
-- **Type Safety**: All types updated to match database schema (snake_case)
-- **Error Handling**: Consistent error handling across all slices
-- **Real-time Integration**: Live updates for all data changes
+#### Phase 4: Redux Store Setup ✅
+- Complete Redux Toolkit store with all slices
+- Board slice with real-time subscriptions
+- Column slice with CRUD operations
+- Card slice with filtering and real-time updates
+- Label slice with complete CRUD operations
+- UI slice for drag-and-drop state
+- Comprehensive selectors for derived state
+- Optimistic updates implementation
 
-### 6. Styling & UI ✅
-- **Tailwind CSS v3.4.0**: Properly configured with PostCSS
-- **Modern Design System**: 
-  - Glassmorphism effects with backdrop blur
-  - Gradient backgrounds (purple to blue)
-  - Priority badges (P1, P2, P3) with color coding
-  - Status indicators (Started, Ongoing, In Progress, Completed, Not Started)
-  - Floating card design with enhanced shadows
-- **Custom CSS Classes**: 
-  - `.kanban-board` - Main board container with gradient
-  - `.kanban-column` - Floating column styling with glassmorphism
-  - `.kanban-card` - Card styling with hover effects
-  - `.priority-badge` and `.status-badge` - Badge styling
-- **Responsive Design**: Mobile-first approach
-- **Typography**: Inter font family integration
-- **Animations**: Custom transitions and hover effects
+#### Phase 5: Drag & Drop Implementation ✅
+- DndContext provider setup with @dnd-kit/core
+- Column drag and drop with database persistence
+- Card drag and drop between columns
+- Card reordering within columns
+- Keyboard navigation (Ctrl+C, Ctrl+N, Ctrl+Arrow, Enter/Space)
+- Touch support for mobile devices (250ms latency, 44px touch targets)
+- Drag performance optimizations (React.memo, useMemo, hardware acceleration)
+- Visual feedback during drag operations
 
-### 7. Real-time Features ✅
-- **Supabase Real-time**: Live updates for all data changes
-- **Subscription Management**: Automatic subscription lifecycle management
-- **Custom Hook**: `useRealtimeSubscriptions` for component integration
-- **Redux Integration**: Real-time updates automatically sync with Redux state
-- **Error Handling**: Graceful handling of connection issues
+#### Phase 6: Card Management ✅
+- Complete card CRUD operations with modals
+- Card creation modal with validation
+- Card detail modal for editing
+- Card deletion with confirmation
+- In-place editing for title, description, due date, priority
+- Real-time search functionality
+- Optimistic updates for smooth UX
 
-### 8. Development Environment ✅
-- **Environment Variables**: Supabase URL and anon key configured
-- **MCP Configuration**: Moved to `.cursor/mcp.json` for security
-- **Git Configuration**: Proper .gitignore with MCP credentials excluded
-- **Development Server**: Vite dev server running on port 3000
+#### Phase 7: Column Management ✅
+- Complete column CRUD operations
+- Column creation modal with validation
+- Column editing with in-place updates
+- Column deletion with card cleanup options
+- Column reordering with database persistence
+- Real-time updates and optimistic UI feedback
 
-## Current Application State
+### 🚧 Current Bug Report
+**Real-time Sync Issue**: Card deletions from one app instance don't automatically update other running instances. Users need to refresh the page to see changes. Root cause suspected in subscription handling for DELETE events.
 
-### ✅ Working Features
-- Application loads and displays data from Supabase
-- Board, columns, and cards are fetched and displayed with modern UI
-- Real-time subscriptions working for live updates
-- Modern glassmorphism design with floating cards and columns
-- Priority badges and status indicators on cards
-- Consolidated floating header with board management and view options
-- Error handling and loading states work correctly
-- TypeScript compilation with no errors
-- Complete Redux store with all slices and selectors
-- Label system with CRUD operations and real-time updates
-- Optimistic updates for immediate UI feedback
-- Drag-and-drop context is set up (infrastructure ready)
+### 📋 Next Phase: Phase 8 - Labels and Tags System
+- Label management system with color customization
+- Label assignment to cards
+- Label-based filtering and grouping
+- Label statistics and analytics
 
-### 📊 Current Data Display
-- **1 Board**: "My Kanban Board" with modern floating header
-- **3 Columns**: "To Do", "In Progress", "Done" with glassmorphism styling
-- **3 Sample Cards**: 
-  - "Design new landing page" (To Do) with priority and status badges
-  - "Implement user authentication" (In Progress) with priority and status badges
-  - "Write API documentation" (Done) with priority and status badges
+## Architecture Details
 
-### 🎨 UI Features
-- **Floating Design**: All elements use glassmorphism with backdrop blur
-- **Gradient Background**: Purple to blue gradient across the entire board
-- **Priority Badges**: P1 (red), P2 (orange), P3 (yellow) with proper styling
-- **Status Indicators**: Color-coded status badges for task states
-- **Enhanced Shadows**: Deep shadows on columns for better visual separation
-- **Responsive Layout**: Mobile-first design with proper breakpoints
+### Project Structure
+```
+src/
+├── components/
+│   ├── board/
+│   │   └── Board.tsx
+│   ├── card/
+│   │   ├── Card.tsx
+│   │   ├── CardCreateModal.tsx
+│   │   ├── CardDeleteModal.tsx
+│   │   └── CardDetailModal.tsx
+│   ├── column/
+│   │   ├── Column.tsx
+│   │   ├── ColumnCreateModal.tsx
+│   │   ├── ColumnEditModal.tsx
+│   │   └── ColumnDeleteModal.tsx
+│   └── ui/
+│       ├── ErrorBoundary.tsx
+│       ├── Header.tsx
+│       ├── LoadingSpinner.tsx
+│       ├── Modal.tsx
+│       └── ModalProvider.tsx
+├── hooks/
+│   ├── redux.ts
+│   └── useRealtimeSubscriptions.ts
+├── services/
+│   └── supabase.ts
+├── store/
+│   ├── index.ts
+│   ├── selectors.ts
+│   └── slices/
+│       ├── boardSlice.ts
+│       ├── cardSlice.ts
+                ├── columnSlice.ts
+│       ├── labelSlice.ts
+│       └── uiSlice.ts
+├── styles/
+│   └── globals.css
+├── types/
+│   └── index.ts
+└── utils/
+    ├── debug.ts
+    └── index.ts
+```
 
-### 🔧 Technical Implementation Details
+### Git Branch Strategy
+- **main**: Production branch - stable, tested code
+- **development**: Integration branch - ongoing development (current)
+- **feature/***: Feature branches (e.g., feature/phase-5-keyboard-navigation)
+- **fix/***: Bug修复分支 (e.g., fix/page-reload-on-card-operations)
 
-#### Data Flow
-1. App.tsx dispatches fetch actions on mount and sets up real-time subscriptions
-2. Redux slices fetch data from Supabase and handle real-time updates
-3. Data is transformed from snake_case to camelCase
-4. Components receive data via Redux selectors and real-time updates
-5. UI renders with modern glassmorphism styling and floating design
+### Key Features Implemented
 
-#### Key Files Modified
-- `src/App.tsx` - Real-time subscriptions, modal provider, consolidated header
-- `src/components/board/Board.tsx` - Floating header, modern styling, column management
-- `src/components/column/Column.tsx` - Glassmorphism styling, card management
-- `src/components/card/Card.tsx` - Priority badges, status indicators, modern design
-- `src/components/ui/Modal.tsx` - Generic modal component
-- `src/components/ui/ModalProvider.tsx` - Modal context provider
-- `src/hooks/useRealtimeSubscriptions.ts` - Real-time subscription management
-- `src/store/slices/*.ts` - Real-time integration and immutable state updates
-- `src/store/selectors.ts` - Comprehensive selectors for derived state
-- `src/store/slices/labelSlice.ts` - Complete label system with CRUD operations
-- `src/types/index.ts` - Updated types to match database schema
-- `src/services/supabase.ts` - Real-time subscription functions and management
-- `src/styles/globals.css` - Modern design system with glassmorphism
-- `tailwind.config.js` - Custom design system
-- `postcss.config.js` - PostCSS configuration for Tailwind
+#### Drag & Drop System
+- Touch-enabled with mobile optimization
+- Keyboard accessibility (Enter/Space for activation)
+- Performance optimized (React.memo, CSS hardware acceleration)
+- Visual feedback with opacity changes
+- Database persistence of new positions
 
-#### Database Integration
-- **Connection**: Supabase client configured with environment variables
-- **Real-time**: Live subscriptions for boards, columns, and cards
-- **Queries**: Optimized queries with proper joins and ordering
-- **Transformation**: Helper functions convert database fields to frontend format
-- **Error Handling**: Comprehensive error handling with user feedback
-- **Subscription Management**: Automatic lifecycle management for real-time connections
+#### Real-time Features
+- Live subscription updates for all CRUD operations
+- Optimistic UI updates with rollback on errors
+- Deduplication logic to prevent race conditions
+- Debug logging for development environment
 
-## Pending Tasks
+#### Modal System
+- Generic modal component with provider/context
+- Proper DOM handling and race condition fixes
+- Accessibility with ARIA labels and keyboard support
+- Auto-dismiss on successful operations
 
-### 🚧 Incomplete Features
-- **Drag & Drop Logic**: Complete drag-and-drop implementation for cards and columns
-- **CRUD Operations**: Create, update, delete cards and columns (UI ready, logic needed)
-- **Modal Forms**: Implement forms for creating/editing cards and columns
-- **User Assignment**: Card assignee functionality
+#### Modern UI Design
+- Glassmorphism effects with backdrop blur
+- Gradient backgrounds (purple to blue)
+- Priority badges (P1, P2, P3) with color coding
+- Status indicators (Started, Ongoing, In Progress, Completed, Not Started)
+- Responsive mobile-first design
 
-### 🚧 Future Enhancements
-- **Authentication**: User login and board permissions
-- **Board Management**: Multiple boards and board switching
-- **Advanced Features**: Due dates, attachments, comments
-- **Performance**: Virtualization for large datasets
-- **Mobile Optimization**: Enhanced mobile experience
-- **Keyboard Shortcuts**: Power user features
-- **Export/Import**: Board data backup and sharing
+## Development Workflow
 
-## Development Notes
+### GitHub Operations Rules (Enforced)
+All bug reports MUST follow this workflow:
+1. **Create GitHub Issue FIRST** (before any code changes)
+2. Create fix branch from development
+3. Implement fix with proper tests
+4. Commit with "Fixes #X" message
+5. Create PR from fix branch to development
+6. Link PR to issue
 
-### Architecture Decisions
-- **Functional Components**: Using React hooks instead of class components
-- **Redux Toolkit**: Modern Redux with createSlice and createAsyncThunk
-- **TypeScript**: Strict typing throughout the application
-- **Tailwind CSS**: Utility-first styling with custom component classes
-- **Vite**: Fast development and build tooling
+### Pre-commit Checklist (Mandatory)
+- TypeScript compilation (`npm run type-check`)
+- ESLint (`npm run lint`)
+- Build verification (`npm run build`)
 
-### Code Quality
-- **ESLint**: Configured with React and TypeScript rules
-- **Prettier**: Code formatting consistency
-- **TypeScript**: Strict mode with proper type definitions
-- **Git**: Clean commit history with descriptive messages
+### Branch Management
+- Feature branches: `feature/phase-X-description`
+- Bug fix branches: `fix/issue-description`
+- Never commit directly to main
+- Always merge through development first
 
-### Performance Considerations
-- **Data Fetching**: Efficient queries with proper joins
-- **State Management**: Normalized Redux state structure
-- **Styling**: Tailwind CSS for optimized bundle size
-- **Development**: Hot module replacement for fast development
+## Environment Configuration
 
-## Environment Setup
-
-### Required Environment Variables
+### Environment Variables
 ```bash
 VITE_SUPABASE_URL=https://nylxlzptkwiwhhnququw.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_ANON_KEY=[anon-key]
 VITE_APP_NAME=Vibe Kanban
 VITE_APP_VERSION=1.0.0
 VITE_DEBUG=true
 ```
-
-### MCP Configuration
-- **MCP Location**: `.cursor/mcp.json` with Supabase credentials
-- **Database Tools**: Available for schema management and data queries
-- **Security**: MCP credentials excluded from git tracking
 
 ### Development Commands
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
 npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
 npm run type-check   # TypeScript type checking
 ```
 
-## Recent Commits
-1. **Latest** - Complete Phase 4: Redux Store Setup with label slice, selectors, and optimistic updates
-2. **Previous** - Fix TypeScript compilation errors for CI/CD pipeline
-3. **Earlier** - feat: Implement GitHub Actions CI/CD pipeline for deployment
-4. **Earlier** - feat: Implement modern UI with glassmorphism, floating headers, and real-time subscriptions
-5. **Initial** - Remove MCP configuration from git tracking
+## Recent Work Completed
 
-## Next Steps for Development
-1. **Complete Phase 5: Drag & Drop Implementation** - Implement card movement between columns
-2. **Add CRUD operations** for creating and editing cards and columns
-3. **Create modal forms** for card and column management
-4. **Enhance mobile experience** with responsive optimizations
-5. **Add advanced features** like due dates, attachments, and comments
+1. **Phase 7**: Column management with CRUD operations and real-time updates
+2. **Phase 5**: Keyboard navigation, touch support, and drag performance
+3. **GitHub Rules**: Enhanced with mandatory bug workflow
+4. **CI/CD**: GitHub Actions pipeline for automated deployment
+5. **Documentation**: Updated README.md with current project status
 
-## Contact & Support
-- **Project Repository**: vibe_kanban
-- **Database**: Supabase project nylxlzptkwiwhhnququw
-- **Development Server**: http://localhost:3000
-- **Last Updated**: January 2025
-- **Current Status**: Phase 4 Complete - Redux Store Setup with comprehensive state management
+## Current Status
+
+### ✅ Working Features
+- Complete drag-and-drop system for cards and columns
+- Real-time collaboration with live updates
+- Card CRUD operations with modals
+- Column CRUD operations with modals
+- Keyboard navigation and accessibility
+- Mobile touch support
+- Performance optimizations
+- Modern UI with glassmorphism design
+
+### 🚨 Known Issues
+1. **Real-time deletion sync bug**: Card deletions don't propagate to other instances
+   - Issue: DELETE events in real-time subscriptions may have timing issues
+   - Status: Under investigation
+   - Fix: Requires proper bug workflow execution
+
+### 📊 Application Data
+- **Sample Board**: "My Kanban Board"
+- **Sample Columns**: Created dynamically via column management
+- **Sample Cards**: Various tasks with priority and status badges
+- **Database Schema**: Complete with RLS policies
+
+## Next Development Steps
+
+1. **Investigate real-time deletion bug** (current priority)
+2. **Phase 8**: Labels and tags system
+3. **User assignment functionality**
+4. **Advanced filtering and search**
+5. **Performance monitoring**
+6. **Comprehensive testing suite**
+
+## Team Context
+
+- **Development Status**: Phases 1-7 complete, Phase 8 in planning
+- **Documentation**: Comprehensive rules in `.cursor/rules/github-operations.mdc`
+- **Quality Assurance**: All code passes TypeScript and ESLint checks
+- **Deployment**: Automated CI/CD pipeline via GitHub Actions
+- **Current Branch**: `development` (stable and current)
+
+## Project Repository
+
+- **Local Path**: `/Users/dbest/git/vibe_kanban`
+- **Remote**: GitHub (delwinbest/vibe_kanban)
+- **CI/CD**: GitHub Actions workflow
+- **Latest PR**: Phase 5 completion merged to development
 
 ---
 
-*This context summary should be referenced in future chat sessions to maintain continuity and understanding of the project's current state.*
+*This context summary reflects the current state after completing Phases 1-7 and should be referenced in future development sessions. Last updated: January 2025*

@@ -72,6 +72,13 @@ CREATE POLICY "Allow all operations for public" ON card_labels
 CREATE POLICY "Allow all operations for public" ON card_assignees
   FOR ALL USING (true);
 
+-- Enable Real-time for tables (required for subscriptions)
+ALTER PUBLICATION supabase_realtime ADD TABLE boards;
+ALTER PUBLICATION supabase_realtime ADD TABLE columns;
+ALTER PUBLICATION supabase_realtime ADD TABLE cards;
+ALTER PUBLICATION supabase_realtime ADD TABLE card_labels;
+ALTER PUBLICATION supabase_realtime ADD TABLE card_assignees;
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_columns_board_id ON columns(board_id);
 CREATE INDEX IF NOT EXISTS idx_columns_position ON columns(position);
