@@ -76,6 +76,38 @@ alwaysApply: true
 5. **Merge to `development`** after approval
 6. **Create PR from `development` to `main`** for production deployment
 
+### GitHub API Merge Instructions (MANDATORY)
+**CRITICAL: Always use GitHub API tools for PR operations.**
+
+#### AI Assistant Merge Requirements
+- **ALWAYS use `mcp_github_merge_pull_request`** to merge pull requests
+- **NEVER suggest "manual merge"** or ask users to merge through web interface
+- **NEVER close unmerged pull requests** without merging them first
+- **ALWAYS merge complete and validated pull requests** immediately after validation
+
+#### Merge Process for AI Assistant
+1. **Validate Changes**: Ensure PR passes quality checks and is thoroughly tested
+2. **Merge Immediately**: Use `mcp_github_merge_pull_request` with appropriate merge method
+   - `merge`: Standard merge (preserves commit history)
+   - `squash`: Squash commits into single commit (clean history)
+   - `rebase`: Rebase commits (linear history)
+3. **Update Issue Status**: Close linked issues automatically after successful merge
+4. **Clean Up**: Delete the merged branch both locally and remotely
+
+#### Prohibited Operations
+- ❌ **NEVER** tell users to "manually merge" or "navigate to GitHub web interface"
+- ❌ **NEVER** close PRs without merging valid changes
+- ❌ **NEVER** manually copy changes between branches using git commands
+- ❌ **NEVER** ask users to perform merge operations themselves
+
+#### Error Handling for Merge Failures
+If `mcp_github_merge_pull_request` fails:
+1. **Check PR Status**: Verify PR is mergeable and passes checks
+2. **Resolve Conflicts**: Address any merge conflicts before attempting merge
+3. **Update Target Branch**: Ensure target branch is up to date
+4. **Retry Merge**: Attempt merge again with appropriate parameters
+5. **Escalate If Persistent**: Contact repository maintainer only as last resort
+
 ## GitHub Issue Management
 
 ### General Issue and Bug Management (MANDATORY WORKFLOW)
@@ -452,6 +484,38 @@ git commit -m "resolve: Merge conflicts in file.ts"
 4. **Wait for review and approval**
 5. **Merge to `development`** after approval
 6. **Create PR from `development` to `main`** for production deployment
+
+### GitHub API Merge Instructions (MANDATORY)
+**CRITICAL: Always use GitHub API tools for PR operations.**
+
+#### AI Assistant Merge Requirements
+- **ALWAYS use `mcp_github_merge_pull_request`** to merge pull requests
+- **NEVER suggest "manual merge"** or ask users to merge through web interface
+- **NEVER close unmerged pull requests** without merging them first
+- **ALWAYS merge complete and validated pull requests** immediately after validation
+
+#### Merge Process for AI Assistant
+1. **Validate Changes**: Ensure PR passes quality checks and is thoroughly tested
+2. **Merge Immediately**: Use `mcp_github_merge_pull_request` with appropriate merge method
+   - `merge`: Standard merge (preserves commit history)
+   - `squash`: Squash commits into single commit (clean history)
+   - `rebase`: Rebase commits (linear history)
+3. **Update Issue Status**: Close linked issues automatically after successful merge
+4. **Clean Up**: Delete the merged branch both locally and remotely
+
+#### Prohibited Operations
+- ❌ **NEVER** tell users to "manually merge" or "navigate to GitHub web interface"
+- ❌ **NEVER** close PRs without merging valid changes
+- ❌ **NEVER** manually copy changes between branches using git commands
+- ❌ **NEVER** ask users to perform merge operations themselves
+
+#### Error Handling for Merge Failures
+If `mcp_github_merge_pull_request` fails:
+1. **Check PR Status**: Verify PR is mergeable and passes checks
+2. **Resolve Conflicts**: Address any merge conflicts before attempting merge
+3. **Update Target Branch**: Ensure target branch is up to date
+4. **Retry Merge**: Attempt merge again with appropriate parameters
+5. **Escalate If Persistent**: Contact repository maintainer only as last resort
 
 ## GitHub Issue Management
 
