@@ -21,6 +21,23 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Error caught by boundary:', error, errorInfo);
+    
+    // Handle specific DOM manipulation errors
+    if (error.name === 'NotFoundError' && error.message.includes('removeChild')) {
+      console.warn('🔧 ERROR_BOUNDARY: DOM removeChild error detected - likely from subscription cleanup', {
+        error: error.message,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString()
+      });
+      
+      // This error is non-fatal and related to component cleanup
+      // We can attempt to recover automatically
+      setTimeout(() => {
+        console.log('🔧 ERROR_BOUNDARY: Attempting automatic recovery from DOM error');
+        this.setState({ hasError: false, error: undefined });
+      }, 1000);
+    }
+    
   }
 
   render() {
