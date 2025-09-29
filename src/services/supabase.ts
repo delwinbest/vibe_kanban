@@ -76,6 +76,33 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
     timestamp: new Date().toISOString()
   });
   
+  // Test: Also create a broad subscription without filter to see if any events are received
+  const testChannel = supabase
+    .channel(`test_cards_all_${boardId}`)
+    .on('postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public', 
+        table: TABLES.CARDS
+      },
+      (payload) => {
+        console.log('🔧 SUPABASE: TEST - Raw subscription event (no filter)', {
+          channel: `test_cards_all_${boardId}`,
+          event_type: payload.eventType,
+          card_id: (payload.new as any)?.id || (payload.old as any)?.id,
+          column_id: (payload.new as any)?.column_id || (payload.old as any)?.column_id,
+          callback_data: payload
+        });
+      }
+    )
+    .subscribe((status) => {
+      console.log('🔧 SUPABASE: TEST channel status', {
+        channel: `test_cards_all_${boardId}`,
+        status: status,
+        timestamp: new Date().toISOString()
+      });
+    });
+  
   const channel = supabase
     .channel(`cards_changes_${boardId}`)
     .on('postgres_changes', 
@@ -103,6 +130,9 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
         timestamp: new Date().toISOString()
       });
     });
+    
+  // Store test channel for cleanup
+  subscriptionManager.subscribe(`test_cards_all_${boardId}`, testChannel);
     
   return channel;
 };
