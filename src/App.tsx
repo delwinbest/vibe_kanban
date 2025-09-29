@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/core';
+import { useEffect, useCallback } from 'react';
+import { DndContext, DragEndEvent, DragOverEvent, DragStartEvent, TouchSensor, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
@@ -27,6 +27,21 @@ function AppContent() {
   
   // Set up real-time subscriptions
   const { board, columns, cards, isSubscribed } = useRealtimeSubscriptions(boardId);
+
+  // Set up sensors for touch and pointer support with performance optimizations
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    })
+  );
   
   const { loading, error } = useAppSelector((state) => ({
     // Only show loading for initial data fetch, not for card operations
@@ -168,7 +183,7 @@ function AppContent() {
     dispatch(endDrag());
   };
 
-  const handleAddCard = (columnId: string) => {
+  const handleAddCard = useCallback((columnId: string) => {
     const column = columns.find(col => col.id === columnId);
     if (column) {
       debugLog.modal.open('create-card', { columnId, columnName: column.name });
@@ -177,7 +192,8 @@ function AppContent() {
         { title: 'Create New Card', size: 'md' }
       );
     }
-  };
+  }, [columns, openModal]);
+
 
   const handleEditCard = (card: any) => {
     debugLog.card.edit(card.id, {
@@ -211,13 +227,13 @@ function AppContent() {
     }
   };
 
-  const handleAddColumn = () => {
+  const handleAddColumn = useCallback(() => {
     debugLog.modal.open('create-column', { boardId });
     openModal(
       <ColumnCreateModal boardId={boardId} onClose={closeModal} />,
       { title: 'Create New Column', size: 'md' }
     );
-  };
+  }, [boardId, openModal, closeModal]);
 
   const handleEditColumn = (column: any) => {
     debugLog.modal.open('edit-column', { columnId: column.id, columnName: column.name });
@@ -238,6 +254,67 @@ function AppContent() {
     }
   };
 
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Only handle keyboard navigation when not in an input/textarea/select
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+      return;
+    }
+
+    // Handle keyboard shortcuts
+    switch (event.key) {
+      case 'c':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          // Find the first column to add a card to
+          if (columns.length > 0) {
+            handleAddCard(columns[0].id);
+          }
+        }
+        break;
+      case 'n':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          handleAddColumn();
+        }
+        break;
+      case 'Escape':
+        // Close any open modals or cancel drag operations
+        dispatch(endDrag());
+        break;
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          // Navigate between columns
+          const currentColumnIndex = columns.findIndex(col => 
+            document.activeElement?.closest(`[data-column-id="${col.id}"]`)
+          );
+          if (currentColumnIndex !== -1) {
+            const direction = event.key === 'ArrowLeft' ? -1 : 1;
+            const nextColumnIndex = (currentColumnIndex + direction + columns.length) % columns.length;
+            const nextColumn = columns[nextColumnIndex];
+            if (nextColumn) {
+              const nextColumnElement = document.querySelector(`[data-column-id="${nextColumn.id}"]`);
+              if (nextColumnElement) {
+                (nextColumnElement as HTMLElement).focus();
+              }
+            }
+          }
+        }
+        break;
+    }
+  }, [columns, handleAddCard, handleAddColumn, dispatch]);
+
+  // Add keyboard event listener
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -255,6 +332,7 @@ function AppContent() {
 
   return (
     <DndContext
+      sensors={sensors}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
