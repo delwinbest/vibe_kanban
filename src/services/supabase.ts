@@ -69,7 +69,14 @@ export const subscribeToColumns = (boardId: string, callback: (payload: any) => 
 };
 
 export const subscribeToCards = (boardId: string, callback: (payload: any) => void) => {
-  return supabase
+  console.log('🔧 SUPABASE: Creating subscription with board filter', {
+    board_id: boardId,
+    channel: `cards_changes_${boardId}`,
+    filter: `column_id=in.(select id from columns where board_id=eq.${boardId})`,
+    timestamp: new Date().toISOString()
+  });
+  
+  const channel = supabase
     .channel(`cards_changes_${boardId}`)
     .on('postgres_changes', 
       { 
@@ -78,9 +85,26 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
         table: TABLES.CARDS,
         filter: `column_id=in.(select id from columns where board_id=eq.${boardId})`
       },
-      callback
+      (payload) => {
+        console.log('🔧 SUPABASE: Raw Supabase subscription event', {
+          channel: `cards_changes_${boardId}`,
+          event_type: payload.eventType,
+          new_data: payload.new,
+          old_data: payload.old,
+          timestamp: new Date().toISOString()
+        });
+        callback(payload);
+      }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log('🔧 SUPABASE: Subscription status update', {
+        channel: `cards_changes_${boardId}`,
+        status: status,
+        timestamp: new Date().toISOString()
+      });
+    });
+    
+  return channel;
 };
 
 // Subscription management
