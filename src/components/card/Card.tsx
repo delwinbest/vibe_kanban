@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo, useMemo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Priority } from '../../types';
@@ -207,9 +207,21 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     }
   };
 
-  const isOverdue = card.due_date && new Date(card.due_date) < new Date();
-  const priorityBadge = getPriorityBadge(card.priority);
-  const statusBadge = getStatusBadge(card.status);
+  // Memoize expensive calculations
+  const isOverdue = useMemo(() => 
+    card.due_date && new Date(card.due_date) < new Date(), 
+    [card.due_date]
+  );
+  
+  const priorityBadge = useMemo(() => 
+    getPriorityBadge(card.priority), 
+    [card.priority]
+  );
+  
+  const statusBadge = useMemo(() => 
+    getStatusBadge(card.status), 
+    [card.status]
+  );
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't open detail view if clicking on interactive elements
@@ -229,6 +241,13 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
     );
   };
 
+  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick(e as any);
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -236,8 +255,10 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
       className={`kanban-card group cursor-pointer ${
         isDragging ? 'opacity-50 shadow-lg' : ''
       }`}
+      aria-label={`Card: ${card.title}`}
       {...attributes}
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
     >
       {/* Card Header */}
       <div className="flex items-start justify-between mb-3">
@@ -288,7 +309,7 @@ const Card: React.FC<CardProps> = ({ card, onEdit, onDelete, onMove: _onMove }) 
           </button>
           <button
             {...listeners}
-            className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors touch-manipulation"
             title="Drag to move"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

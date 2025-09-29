@@ -60,6 +60,12 @@ export const fetchCards = createAsyncThunk(
 export const createCard = createAsyncThunk(
   'cards/createCard',
   async (request: CreateCardRequest) => {
+    console.log('🐛 CREATE CARD: Starting create operation', {
+      column_id: request.column_id,
+      title: request.title,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       const { data, error } = await supabase
         .from(TABLES.CARDS)
@@ -74,9 +80,21 @@ export const createCard = createAsyncThunk(
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('🐛 CREATE CARD: Supabase error', error);
+        throw error;
+      }
+      
+      console.log('🐛 CREATE CARD: Success', {
+        card_id: data.id,
+        column_id: data.column_id,
+        title: data.title,
+        timestamp: new Date().toISOString()
+      });
+      
       return data;
     } catch (error) {
+      console.error('🐛 CREATE CARD: Handle error', error);
       return handleSupabaseError(error);
     }
   }
@@ -112,15 +130,31 @@ export const updateCard = createAsyncThunk(
 export const deleteCard = createAsyncThunk(
   'cards/deleteCard',
   async (cardId: string) => {
+    console.log('🐛 DELETE CARD: Starting delete operation', {
+      card_id: cardId,
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       const { error } = await supabase
         .from(TABLES.CARDS)
         .delete()
         .eq('id', cardId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('🐛 DELETE CARD: Supabase error', error);
+        throw error;
+      }
+      
+      console.log('🐛 DELETE CARD: Success', {
+        card_id: cardId,
+        timestamp: new Date().toISOString(),
+        message: 'Card deleted from database'
+      });
+      
       return cardId;
     } catch (error) {
+      console.error('🐛 DELETE CARD: Handle error', error);
       return handleSupabaseError(error);
     }
   }
@@ -149,40 +183,121 @@ export const moveCard = createAsyncThunk(
   }
 );
 
+export const reorderCards = createAsyncThunk(
+  'cards/reorderCards',
+  async (cards: { id: string; position: number; column_id: string }[]) => {
+    try {
+      console.log('🐛 REORDER CARDS: Starting bulk position update', {
+        cards_count: cards.length,
+        cards: cards.map(c => ({ id: c.id, position: c.position, column_id: c.column_id }))
+      });
+      
+      const updates = cards.map(card => ({
+        id: card.id,
+        position: card.position,
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from(TABLES.CARDS)
+        .upsert(updates, { onConflict: 'id' });
+
+      if (error) {
+        console.error('🐛 REORDER CARDS: Supabase error', error);
+        throw error;
+      }
+      
+      console.log('🐛 REORDER CARDS: Success', {
+        updated_cards: updates.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      return cards;
+    } catch (error) {
+      console.error('🐛 REORDER CARDS: Handle error', error);
+      return handleSupabaseError(error);
+    }
+  }
+);
+
 // Real-time subscription actions
 export const subscribeToCardChanges = createAsyncThunk(
   'cards/subscribeToCardChanges',
   async (boardId: string, { dispatch }) => {
+    console.log('🚀 SUBSCRIPTION: Starting subscription to cards', {
+      board_id: boardId,
+      timestamp: new Date().toISOString(),
+      channel_name: `cards_changes_${boardId}`
+    });
     const subscription = subscribeToCards(boardId, (payload) => {
-      console.log('Card change received:', payload);
+      console.log('🔔 SUBSCRIPTION: Real-time event received', {
+        timestamp: new Date().toISOString(),
+        board_id: boardId,
+        event_type: payload.eventType,
+        card_id: payload.new?.id || payload.old?.id,
+        column_id: payload.new?.column_id || payload.old?.column_id,
+        title: payload.new?.title || payload.old?.title,
+        payload_object: payload
+      });
       
       switch (payload.eventType) {
         case 'INSERT':
+          console.log('🔔 SUBSCRIPTION: Processing INSERT event', {
+            card_id: payload.new.id,
+            title: payload.new.title,
+            column_id: payload.new.column_id
+          });
           // Delay to allow pending operations to complete first
           setTimeout(() => {
+            console.log('🔔 SUBSCRIPTION: Dispatching addCard', payload.new.id);
             dispatch(addCard(transformCard(payload.new)));
           }, 100);
           break;
         case 'UPDATE':
+          console.log('🔔 SUBSCRIPTION: Processing UPDATE event', {
+            card_id: payload.new.id,
+            title: payload.new.title,
+            is_temporary: payload.new.id.toString().startsWith('temp-')
+          });
           // Only update if not a temporary card (prevents conflicts with optimistic updates)
           if (!payload.new.id.toString().startsWith('temp-')) {
             setTimeout(() => {
+              console.log('🔔 SUBSCRIPTION: Dispatching updateCardInState', payload.new.id);
               dispatch(updateCardInState(transformCard(payload.new)));
             }, 100);
+          } else {
+            console.log('🔔 SUBSCRIPTION: Skipping update for temporary card', payload.new.id);
           }
           break;
         case 'DELETE':
-          // Delay to allow optimistic delete to process first
-          setTimeout(() => {
-            dispatch(removeCard(payload.old.id));
-          }, 100);
+          console.log('🔔 SUBSCRIPTION: Processing DELETE event', {
+            card_id: payload.old.id,
+            title: payload.old.title,
+            column_id: payload.old.column_id
+          });
+          // Remove delay - optimistic updates already handle immediate UI feedback
+          // Real-time updates should confirm the deletion immediately
+          console.log('🔔 SUBSCRIPTION: Dispatching removeCard', payload.old.id);
+          dispatch(removeCard(payload.old.id));
           break;
         default:
+          console.log('🔔 SUBSCRIPTION: Unknown event type', payload.eventType);
           break;
       }
     });
 
+    console.log('🚀 SUBSCRIPTION: Registering subscription with manager', {
+      board_id: boardId,
+      subscription_key: `cards_${boardId}`
+    });
+    
     subscriptionManager.subscribe(`cards_${boardId}`, subscription);
+    
+    console.log('✅ SUBSCRIPTION: Card subscription established', {
+      board_id: boardId,
+      active_subscriptions: subscriptionManager.getActiveSubscriptions()
+    });
+    
     return true;
   }
 );
@@ -190,7 +305,8 @@ export const subscribeToCardChanges = createAsyncThunk(
 export const unsubscribeFromCardChanges = createAsyncThunk(
   'cards/unsubscribeFromCardChanges',
   async (boardId: string) => {
-    subscriptionManager.unsubscribe(`cards_${boardId}`);
+    // Clean up subscription channel
+    subscriptionManager.unsubscribe(`cards_changes_${boardId}`);
     return true;
   }
 );
@@ -235,7 +351,18 @@ const cardSlice = createSlice({
       // Only add if not already present (prevents duplication from real-time subscriptions)
       const existingCard = state.cards.find(card => card.id === action.payload.id);
       if (!existingCard) {
+        console.log('📝 REDUX: Adding card to state', {
+          card_id: action.payload.id,
+          title: action.payload.title,
+          column_id: action.payload.column_id,
+          current_cards_count: state.cards.length
+        });
         state.cards.push(action.payload);
+      } else {
+        console.log('📝 REDUX: Card already exists, skipping add', {
+          card_id: action.payload.id,
+          title: action.payload.title
+        });
       }
     },
     updateCardInState: (state, action: PayloadAction<Card>) => {
@@ -245,7 +372,21 @@ const cardSlice = createSlice({
       }
     },
     removeCard: (state, action: PayloadAction<string>) => {
-      state.cards = state.cards.filter(card => card.id !== action.payload);
+      const existingCard = state.cards.find(card => card.id === action.payload);
+      if (existingCard) {
+        console.log('📝 REDUX: Removing card from state', {
+          card_id: action.payload,
+          title: existingCard.title,
+          column_id: existingCard.column_id,
+          current_cards_count: state.cards.length
+        });
+        state.cards = state.cards.filter(card => card.id !== action.payload);
+      } else {
+        console.log('📝 REDUX: Card not found, skipping removal', {
+          card_id: action.payload,
+          available_card_ids: state.cards.map(card => card.id)
+        });
+      }
     },
     setSubscribed: (state, action: PayloadAction<boolean>) => {
       state.isSubscribed = action.payload;
@@ -374,6 +515,20 @@ const cardSlice = createSlice({
       .addCase(moveCard.rejected, (state, action) => {
         state.error = action.error.message || 'Failed to move card';
         // TODO: Revert optimistic move on error
+      })
+      // Reorder cards - optimistic update already handled by reorderCardsInColumn reducer
+      .addCase(reorderCards.fulfilled, (_state, action) => {
+        // Success - optimistic update was correct, no additional state changes needed
+        if (Array.isArray(action.payload)) {
+          console.log('📝 REDUX: Reorder cards confirmed by server', action.payload.length);
+        } else {
+          console.log('📝 REDUX: Reorder cards confirmed by server (error case)');
+        }
+      })
+      .addCase(reorderCards.rejected, (state, action) => {
+        state.error = action.error.message || 'Failed to reorder cards';
+        // TODO: Revert optimistic reorder on error
+        console.log('📝 REDUX: Reorder cards failed', action.error.message);
       })
       // Subscribe to card changes
       .addCase(subscribeToCardChanges.fulfilled, (state) => {

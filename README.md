@@ -12,13 +12,17 @@ A modern Trello-style kanban board application built with React, TypeScript, and
   - In-place editing for title, description, due date, and priority
   - Priority badges (P1, P2, P3) and status indicators
   - Card search functionality
+- 📊 **Column Management**: Complete CRUD operations for columns (Phase 7 ✅)
+  - Column creation, editing, and deletion with modals
+  - Column reordering with drag-and-drop
+  - Column position management
 - 🎨 **Modern UI Design**: Clean, professional interface with consolidated header
-- 📱 **Responsive Design**: Mobile-first responsive layout
+- 📱 **Responsive Design**: Mobile-first responsive layout with accessibility
+- ⚡ **Performance Optimizations**: React.memo, useMemo, useCallback optimizations
+- 🎹 **Keyboard Navigation**: Global shortcuts and accessibility features
+- 👆 **Touch Support**: Mobile-optimized drag-and-drop interactions
 - 💾 **Data Persistence**: Supabase backend with Redux state management
-- 🔧 **Modal System**: Complete modal system for card operations
-
-### 🚧 In Development
-- 📊 **Column Management**: CRUD operations for columns (Phase 7)
+- 🔧 **Modal System**: Complete modal system for card and column operations
 
 ### 📋 Planned Features
 - 📤 **Import/Export**: JSON and CSV data management capabilities
@@ -115,80 +119,30 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ### 4. Set up Database Schema
 
-Run the following SQL in your Supabase SQL editor:
+⚠️ **CRITICAL**: Real-time subscriptions require specific database configuration to work properly.
 
-```sql
--- Create boards table
-CREATE TABLE boards (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create columns table
-CREATE TABLE columns (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  board_id UUID REFERENCES boards(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  position INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create cards table
-CREATE TABLE cards (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  column_id UUID REFERENCES columns(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  description TEXT,
-  due_date DATE,
-  priority TEXT CHECK (priority IN ('low', 'medium', 'high', 'critical')) DEFAULT 'medium',
-  position INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create card_labels table
-CREATE TABLE card_labels (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  color TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Create card_assignees table
-CREATE TABLE card_assignees (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  card_id UUID REFERENCES cards(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
-  assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Enable Row Level Security
-ALTER TABLE boards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE columns ENABLE ROW LEVEL SECURITY;
-ALTER TABLE cards ENABLE ROW LEVEL SECURITY;
-ALTER TABLE card_labels ENABLE ROW LEVEL SECURITY;
-ALTER TABLE card_assignees ENABLE ROW LEVEL SECURITY;
-
--- Create policies (adjust based on your auth requirements)
-CREATE POLICY "Allow all operations for authenticated users" ON boards
-  FOR ALL USING (true);
-
-CREATE POLICY "Allow all operations for authenticated users" ON columns
-  FOR ALL USING (true);
-
-CREATE POLICY "Allow all operations for authenticated users" ON cards
-  FOR ALL USING (true);
-
-CREATE POLICY "Allow all operations for authenticated users" ON card_labels
-  FOR ALL USING (true);
-
-CREATE POLICY "Allow all operations for authenticated users" ON card_assignees
-  FOR ALL USING (true);
+**Option A: Use the setup script (Recommended)**
+```bash
+./setup-database.sh
 ```
+
+**Option B: Manual setup**
+Run the complete schema file [`supabase-schema.sql`](supabase-schema.sql) in your Supabase SQL editor. This includes:
+
+- All table definitions (boards, columns, cards, card_labels, card_assignees)
+- Row Level Security policies
+- **Required real-time publication settings** (CRITICAL for subscriptions):
+  ```sql
+  -- Enable Real-time for tables (REQUIRED for subscriptions)
+  ALTER PUBLICATION supabase_realtime ADD TABLE boards;
+  ALTER PUBLICATION supabase_realtime ADD TABLE columns;
+  ALTER PUBLICATION supabase_realtime ADD TABLE cards;
+  ALTER PUBLICATION supabase_realtime ADD TABLE card_labels;
+  ALTER PUBLICATION supabase_realtime ADD TABLE card_assignees;
+  ```
+- Performance indexes
+
+**⚠️ Important**: Without enabling real-time publication, subscription events will not propagate between instances, causing real-time collaboration to fail silently.
 
 ### 5. Start Development Server
 
@@ -217,10 +171,23 @@ The application includes comprehensive real-time functionality powered by Supaba
 
 ### Testing Real-time Features
 To test real-time functionality:
-1. Open the application in multiple browser tabs
-2. Make changes in one tab (edit cards, move items, etc.)
-3. Observe live updates in other tabs
-4. Check browser console for subscription logs and debug information
+1. **Ensure real-time is enabled** (see Database Schema section above)
+2. Open the application in multiple browser tabs
+3. Make changes in one tab (create/edit/delete cards, reorder columns, etc.)
+4. Observe live updates in other tabs
+5. Check browser console for comprehensive subscription logging:
+   - 🚀 SUBSCRIPTION: Setup and lifecycle events
+   - 🔧 SUPABASE: Raw database events and channel status
+   - 🔔 SUBSCRIPTION: Processed events sent to Redux
+   - 📝 REDUX: State updates and reducer actions
+   - 🐛 OPERATIONS: Database operations (create/delete success/failure)
+
+### Troubleshooting Real-time Issues
+If real-time collaboration isn't working:
+1. **Check database configuration**: Ensure `ALTER PUBLICATION supabase_realtime ADD TABLE` commands were executed
+2. **Verify console logs**: Look for subscription setup messages and event propagation
+3. **Network inspection**: Check browser dev tools for WebSocket connections
+4. **Subscription status**: Look for "SUBSCRIBED" status in console logs
 
 ## Available Scripts
 
@@ -369,12 +336,20 @@ If you encounter any issues or have questions, please:
 - [x] **Modern UI**: Priority badges, status indicators, responsive design
 - [x] **Search Functionality**: Card search with real-time filtering
 
-### 🚧 Current Development (Phase 7)
-- [ ] **Column Management**: CRUD operations for columns
-  - [ ] Add new column functionality
-  - [ ] Column name editing (in-place)
-  - [ ] Column deletion with confirmation
-  - [ ] Column reordering
+### ✅ Recently Completed (Phase 7)
+- [x] **Column Management**: Complete CRUD operations for columns
+  - [x] Add new column functionality with modal
+  - [x] Column name editing with modal
+  - [x] Column deletion with confirmation modal
+  - [x] Column reordering with drag-and-drop
+  - [x] Column position persistence to database
+
+### 🔧 Bug Fixes & Improvements
+- [x] **Real-time Subscription Fix**: Enabled Supabase real-time publication
+- [x] **Comprehensive Logging**: Added debug logging for subscription troubleshooting
+- [x] **Performance Optimizations**: React.memo, useMemo, useCallback
+- [x] **Accessibility**: Keyboard navigation and ARIA attributes
+- [x] **Mobile Support**: Touch-optimized drag-and-drop interactions
 
 ### 📋 Upcoming Features (Phases 8+)
 - [ ] **Label System**: Advanced labeling and color coding

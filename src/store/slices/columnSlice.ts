@@ -117,6 +117,7 @@ export const reorderColumnsInDatabase = createAsyncThunk(
     try {
       const updates = columns.map((column, index) => ({
         id: column.id,
+        name: column.name,
         position: index,
         updated_at: new Date().toISOString(),
       }));
