@@ -305,7 +305,9 @@ export const subscribeToCardChanges = createAsyncThunk(
 export const unsubscribeFromCardChanges = createAsyncThunk(
   'cards/unsubscribeFromCardChanges',
   async (boardId: string) => {
-    subscriptionManager.unsubscribe(`cards_${boardId}`);
+    // Clean up both regular and test channels
+    subscriptionManager.unsubscribe(`cards_changes_${boardId}`);
+    subscriptionManager.unsubscribe(`test_cards_all_${boardId}`);
     return true;
   }
 );
