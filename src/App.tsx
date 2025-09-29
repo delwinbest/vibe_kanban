@@ -9,6 +9,7 @@ import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard, m
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import ConnectionStatus from './components/ui/ConnectionStatus';
 import { ModalProvider, useModal } from './components/ui/ModalProvider';
 import CardCreateModal from './components/card/CardCreateModal';
 import CardDeleteModal from './components/card/CardDeleteModal';
@@ -402,11 +403,14 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ModalProvider>
-        <AppContent />
-      </ModalProvider>
-    </ErrorBoundary>
+    <>
+      <ConnectionStatus />
+      <ErrorBoundary>
+        <ModalProvider>
+          <AppContent />
+        </ModalProvider>
+      </ErrorBoundary>
+    </>
   );
 }
 

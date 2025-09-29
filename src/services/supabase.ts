@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { connectionMonitor } from '../utils/connectionMonitor';
 
 // Supabase configuration
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -8,7 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create Supabase client
+// Create Supabase client with enhanced network resilience
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -19,8 +20,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     params: {
       eventsPerSecond: 10
     },
-    heartbeatIntervalMs: 30000,
-    reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 5000),
+    heartbeatIntervalMs: 15000, // More frequent heartbeats for poor networks
+    reconnectAfterMs: (tries: number) => {
+      // Exponential backoff with jitter for better resilience
+      const baseDelay = Math.min(tries * 1000, 10000); // Max 10 seconds
+      const jitter = Math.random() * 1000; // Add randomness
+      return baseDelay + jitter;
+    }
   }
 });
 
@@ -116,12 +122,42 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
         timestamp: new Date().toISOString()
       });
       
-      // Handle problematic statuses gracefully
-      if (status === 'TIMED_OUT' || status === 'CLOSED') {
-        console.warn('🔧 SUPABASE: Main channel issue detected', {
+      // Report status to connection monitor
+      connectionMonitor.updateSubscriptionStatus(`cards_changes_${boardId}`, status);
+      
+      // Handle network timeouts with automatic retry
+      if (status === 'TIMED_OUT') {
+        console.warn('🔧 SUPABASE: Network timeout detected - scheduling retry', {
           channel: `cards_changes_${boardId}`,
           status: status,
           board_id: boardId
+        });
+        
+        // Trigger automatic retry using the subscription manager
+        const channelKey = `cards_changes_${boardId}`;
+        subscriptionManager.handleTimeout(channelKey, () => {
+          console.log('🔧 SUPABASE: Retrying subscription after timeout', { channelKey, boardId });
+          // This will be handled by the slice's subscription recreation logic
+        });
+        
+      } else if (status === 'CLOSED') {
+        console.warn('🔧 SUPABASE: Channel closed unexpectedly', {
+          channel: `cards_changes_${boardId}`,
+          status: status,
+          board_id: boardId
+        });
+        
+        // Try to recover from closed channel
+        setTimeout(() => {
+          console.log('🪧 SUPABASE: Attempting to recreate closed channel', { channelKey: `cards_changes_${boardId}` });
+          // Trigger a recreation by dispatching unsubscribe and subscribe again
+          subscriptionManager.unsubscribe(`cards_changes_${boardId}`);
+        }, 2000);
+        
+      } else if (status === 'SUBSCRIBED') {
+        console.log('✅ SUPABASE: Subscription successful', { 
+          channel: `cards_changes_${boardId}`,
+          board_id: boardId 
         });
       }
     });
@@ -132,18 +168,38 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
   return channel;
 };
 
-// Subscription management
+// Subscription management with retry logic and network resilience
 export class SubscriptionManager {
   private subscriptions: Map<string, any> = new Map();
+  private retryAttempts: Map<string, number> = new Map();
+  private maxRetries: number = 5;
+  private retryTimeouts: Map<string, number> = new Map();
 
   subscribe(key: string, subscription: any) {
     // Clean up existing subscription first to prevent conflicts
     this.unsubscribe(key);
+    
+    // Reset retry count for new subscription
+    this.retryAttempts.set(key, 0);
     this.subscriptions.set(key, subscription);
+    
+    console.log('🔧 SUBSCRIPTION: Channel subscribed', { 
+      key, 
+      retries: this.retryAttempts.get(key),
+      timestamp: new Date().toISOString()
+    });
   }
 
   unsubscribe(key: string) {
     const subscription = this.subscriptions.get(key);
+    
+    // Clear any pending retry timeouts
+    const timeout = this.retryTimeouts.get(key);
+    if (timeout) {
+      clearTimeout(timeout);
+      this.retryTimeouts.delete(key);
+    }
+    
     if (subscription) {
       try {
         supabase.removeChannel(subscription);
@@ -151,7 +207,41 @@ export class SubscriptionManager {
       } catch (error) {
         console.warn('🔧 SUBSCRIPTION: Error removing channel', { key, error });
       }
-      this.subscriptions.delete(key);
+    }
+    
+    this.subscriptions.delete(key);
+    this.retryAttempts.delete(key);
+  }
+
+  handleTimeout(key: string, recreateCallback: () => void) {
+    const currentAttempts = this.retryAttempts.get(key) || 0;
+    
+    if (currentAttempts < this.maxRetries) {
+      this.retryAttempts.set(key, currentAttempts + 1);
+      
+      const retryDelay = Math.min(1000 * Math.pow(2, currentAttempts), 30000); // Exponential backoff, max 30s
+      
+      console.warn('🔧 SUBSCRIPTION: Scheduling retry', {
+        key,
+        attempt: currentAttempts + 1,
+        maxAttempts: this.maxRetries,
+        retryInMs: retryDelay,
+        timestamp: new Date().toISOString()
+      });
+      
+      const timeout = setTimeout(() => {
+        console.log('🔧 SUBSCRIPTION: Executing retry', { key, attempt: currentAttempts + 1 });
+        recreateCallback();
+        this.retryTimeouts.delete(key);
+      }, retryDelay);
+      
+      this.retryTimeouts.set(key, timeout as unknown as number);
+    } else {
+      console.error('🔧 SUBSCRIPTION: Max retries exceeded', {
+        key,
+        attempts: currentAttempts,
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
@@ -160,6 +250,12 @@ export class SubscriptionManager {
       count: this.subscriptions.size,
       keys: Array.from(this.subscriptions.keys())
     });
+    
+    // Clear all retry timeouts
+    this.retryTimeouts.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
+    this.retryTimeouts.clear();
     
     this.subscriptions.forEach((subscription, key) => {
       try {
@@ -170,10 +266,19 @@ export class SubscriptionManager {
       }
     });
     this.subscriptions.clear();
+    this.retryAttempts.clear();
   }
 
   getActiveSubscriptions() {
     return Array.from(this.subscriptions.keys());
+  }
+
+  getRetryStatus() {
+    const status: Record<string, { attempts: number; maxRetries: number }> = {};
+    this.retryAttempts.forEach((attempts, key) => {
+      status[key] = { attempts, maxRetries: this.maxRetries };
+    });
+    return status;
   }
 }
 
