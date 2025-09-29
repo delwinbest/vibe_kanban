@@ -67,9 +67,8 @@ const CardCreateModal: React.FC<CardCreateModalProps> = ({ columnId, columnName 
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Create New Card</h2>
+    <div className="p-3">
+      <div className="mb-2">
         <p className="text-sm text-gray-600">Add a new card to "{columnName}"</p>
       </div>
 

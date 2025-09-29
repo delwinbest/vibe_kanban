@@ -47,6 +47,7 @@ A modern Trello-style kanban board application built with React, TypeScript, and
 - Node.js 18+ (recommended: Node.js 20+)
 - npm or yarn
 - Supabase account and project
+- Git (for submodule support)
 
 ## Getting Started
 
@@ -55,6 +56,9 @@ A modern Trello-style kanban board application built with React, TypeScript, and
 ```bash
 git clone <repository-url>
 cd vibe-kanban
+
+# Initialize submodules (for shared Cursor rules)
+git submodule update --init --recursive
 ```
 
 ### 2. Install Dependencies
@@ -236,6 +240,20 @@ src/
 - Implement proper error boundaries and error handling
 - Write accessible components with ARIA labels and keyboard navigation
 
+### Cursor AI Rules
+
+This project uses shared Cursor AI rules managed via Git submodules for consistent development practices. The rules are stored in a separate repository and linked to this project.
+
+**Setup**: Rules are automatically available when you clone with submodules (see Getting Started section above).
+
+**Available Rules**:
+- `modern-web-development.mdc` - Comprehensive web development guidelines
+- `github-operations.mdc` - GitHub workflow and issue management
+- `react-nextjs.mdc` - React and Next.js specific rules
+- `git-branching.mdc` - Git branching strategy and conventions
+
+**Documentation**: See [`CURSOR_RULES_SETUP.md`](CURSOR_RULES_SETUP.md) for detailed setup instructions and usage.
+
 ### Component Structure
 
 - Break down components into smaller, reusable parts
@@ -289,14 +307,15 @@ src/
 6. When ready for release, merge `development` to `main`
 
 ### Current Development Status
-- **Current Branch**: `fix/page-reload-on-card-operations`
-- **Current Phase**: Phase 7 - Column Management
+- **Current Branch**: `development`
+- **Current Phase**: Phase 7 - Column Management ✅
 - **Last Updated**: January 2025
+- **Recent Updates**: Added shared Cursor AI rules via Git submodules
 
 ### Getting Started for Development
 ```bash
-# Clone the repository
-git clone <repository-url>
+# Clone the repository with submodules
+git clone --recurse-submodules <repository-url>
 cd vibe-kanban
 
 # Switch to development branch

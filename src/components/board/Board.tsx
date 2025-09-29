@@ -16,6 +16,7 @@ interface BoardProps {
   onDeleteCard?: (cardId: string) => void;
   onMoveCard?: (cardId: string, newColumnId: string, newPosition: number) => void;
   onMoveColumn?: (columnId: string, newPosition: number) => void;
+  onColumnSettings?: (column: Column) => void;
 }
 
 const Board: React.FC<BoardProps> = ({ 
@@ -29,7 +30,8 @@ const Board: React.FC<BoardProps> = ({
   onEditCard,
   onDeleteCard,
   onMoveCard,
-  onMoveColumn: _onMoveColumn
+  onMoveColumn: _onMoveColumn,
+  onColumnSettings
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -263,6 +265,7 @@ const Board: React.FC<BoardProps> = ({
                     onEditCard={onEditCard}
                     onDeleteCard={onDeleteCard}
                     onMoveCard={handleMoveCard}
+                    onColumnSettings={onColumnSettings}
                   />
                   ))}
               </SortableContext>

@@ -43,8 +43,13 @@ const ColumnCreateModal: React.FC<ColumnCreateModalProps> = ({ boardId, onClose 
       }));
 
       if (createColumn.fulfilled.match(result)) {
-        debugLog.general('Column created successfully', { columnId: result.payload.id });
-        onClose();
+        const payload = result.payload as any;
+        if (payload && typeof payload === 'object' && 'id' in payload) {
+          debugLog.general('Column created successfully', { columnId: payload.id });
+          onClose();
+        } else {
+          setError('Failed to create column');
+        }
       } else {
         setError('Failed to create column');
       }
