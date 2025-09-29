@@ -130,4 +130,49 @@
   .modal-content {
     @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6;
   }
+  
+  /* Touch support optimizations */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Prevent text selection during drag on touch devices */
+  .kanban-card,
+  .kanban-column {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Improve touch targets */
+  @media (hover: none) and (pointer: coarse) {
+    .kanban-card button,
+    .kanban-column button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    .kanban-card {
+      padding: 12px;
+    }
+    
+    .kanban-column {
+      min-width: 280px;
+    }
+  }
+  
+  /* Performance optimizations */
+  .kanban-card,
+  .kanban-column {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  .kanban-card.dragging,
+  .kanban-column.dragging {
+    will-change: transform;
+    transform: translateZ(0);
+  }
 }

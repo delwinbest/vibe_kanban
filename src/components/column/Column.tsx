@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
@@ -35,9 +35,13 @@ const Column: React.FC<ColumnProps> = ({
     transition,
   };
 
-  const columnCards = [...cards]
-    .filter(card => card.column_id === column.id)
-    .sort((a, b) => a.position - b.position);
+  // Memoize column cards to prevent unnecessary re-renders
+  const columnCards = useMemo(() => 
+    [...cards]
+      .filter(card => card.column_id === column.id)
+      .sort((a, b) => a.position - b.position),
+    [cards, column.id]
+  );
 
   return (
     <div
@@ -49,6 +53,8 @@ const Column: React.FC<ColumnProps> = ({
       className={`kanban-column ${
         isDragging ? 'opacity-50' : ''
       } ${isOver ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}`}
+      data-column-id={column.id}
+      aria-label={`Column: ${column.name}`}
       {...attributes}
     >
       {/* Column Header */}
@@ -81,7 +87,7 @@ const Column: React.FC<ColumnProps> = ({
             </button>
             <button
               {...listeners}
-              className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors"
+              className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing transition-colors touch-manipulation"
               title="Drag to reorder"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
