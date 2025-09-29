@@ -16,6 +16,7 @@ import CardDeleteModal from './components/card/CardDeleteModal';
 import ColumnCreateModal from './components/column/ColumnCreateModal';
 import ColumnEditModal from './components/column/ColumnEditModal';
 import ColumnDeleteModal from './components/column/ColumnDeleteModal';
+import ColumnSettingsModal from './components/column/ColumnSettingsModal';
 import { debugLog } from './utils/debug';
 import './styles/globals.css';
 
@@ -290,6 +291,14 @@ function AppContent() {
     );
   };
 
+  const handleColumnSettings = (column: any) => {
+    debugLog.modal.open('column-settings', { columnId: column.id, columnName: column.name });
+    openModal(
+      <ColumnSettingsModal column={column} onClose={closeModal} />,
+      { title: 'Column Settings', size: 'lg' }
+    );
+  };
+
   const handleDeleteColumn = (columnId: string) => {
     const column = columns.find(c => c.id === columnId);
     if (column) {
@@ -396,6 +405,7 @@ function AppContent() {
         onDeleteCard={handleDeleteCard}
         onMoveCard={(cardId, newColumnId, newPosition) => console.log('Move card:', cardId, newColumnId, newPosition)}
         onMoveColumn={(columnId, newPosition) => console.log('Move column:', columnId, newPosition)}
+        onColumnSettings={handleColumnSettings}
       />
     </DndContext>
   );

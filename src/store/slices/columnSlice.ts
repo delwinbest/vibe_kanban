@@ -23,6 +23,7 @@ const transformColumn = (dbColumn: any) => ({
   board_id: dbColumn.board_id,
   name: dbColumn.name,
   position: dbColumn.position,
+  color: dbColumn.color || '#3B82F6',
   created_at: dbColumn.created_at,
   updated_at: dbColumn.updated_at,
 });
@@ -59,12 +60,13 @@ export const createColumn = createAsyncThunk(
           board_id: request.board_id,
           name: request.name,
           position: request.position,
+          color: request.color || '#3B82F6',
         }])
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return transformColumn(data);
     } catch (error) {
       return handleSupabaseError(error);
     }
@@ -80,6 +82,7 @@ export const updateColumn = createAsyncThunk(
         .update({
           ...(request.name && { name: request.name }),
           ...(request.position !== undefined && { position: request.position }),
+          ...(request.color && { color: request.color }),
           updated_at: new Date().toISOString(),
         })
         .eq('id', request.id)
@@ -87,7 +90,7 @@ export const updateColumn = createAsyncThunk(
         .single();
 
       if (error) throw error;
-      return data;
+      return transformColumn(data);
     } catch (error) {
       return handleSupabaseError(error);
     }
@@ -229,10 +232,10 @@ const columnSlice = createSlice({
       })
       .addCase(createColumn.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload && !action.payload.error) {
-          state.columns.push(action.payload);
+        if (action.payload && typeof action.payload === 'object' && 'id' in action.payload) {
+          state.columns.push(action.payload as Column);
         } else {
-          state.error = action.payload?.error || 'Failed to create column';
+          state.error = (action.payload as any)?.error || 'Failed to create column';
         }
       })
       .addCase(createColumn.rejected, (state, action) => {
@@ -246,13 +249,13 @@ const columnSlice = createSlice({
       })
       .addCase(updateColumn.fulfilled, (state, action) => {
         state.loading = false;
-        if (action.payload && !action.payload.error) {
-          const index = state.columns.findIndex((col: Column) => col.id === action.payload.id);
+        if (action.payload && typeof action.payload === 'object' && 'id' in action.payload) {
+          const index = state.columns.findIndex((col: Column) => col.id === (action.payload as Column).id);
           if (index !== -1) {
-            state.columns[index] = action.payload;
+            state.columns[index] = action.payload as Column;
           }
         } else {
-          state.error = action.payload?.error || 'Failed to update column';
+          state.error = (action.payload as any)?.error || 'Failed to update column';
         }
       })
       .addCase(updateColumn.rejected, (state, action) => {

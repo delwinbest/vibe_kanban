@@ -11,6 +11,7 @@ export interface Column {
   board_id: string;
   name: string;
   position: number;
+  color: string;
   created_at: string;
   updated_at: string;
 }
@@ -115,12 +116,14 @@ export interface CreateColumnRequest {
   board_id: string;
   name: string;
   position: number;
+  color?: string;
 }
 
 export interface UpdateColumnRequest {
   id: string;
   name?: string;
   position?: number;
+  color?: string;
 }
 
 // Component Props types
@@ -140,6 +143,7 @@ export interface ColumnProps {
   onEditCard?: (card: Card) => void;
   onDeleteCard?: (cardId: string) => void;
   onMoveCard: (cardId: string, newColumnId: string, newPosition: number) => void;
+  onColumnSettings?: (column: Column) => void;
 }
 
 export interface BoardProps {
@@ -154,6 +158,7 @@ export interface BoardProps {
   onDeleteCard: (cardId: string) => void;
   onMoveCard: (cardId: string, newColumnId: string, newPosition: number) => void;
   onMoveColumn: (columnId: string, newPosition: number) => void;
+  onColumnSettings?: (column: Column) => void;
 }
 
 // Utility types

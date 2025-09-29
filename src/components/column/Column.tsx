@@ -11,11 +11,11 @@ const Column: React.FC<ColumnProps> = ({
   column, 
   cards, 
   onAddCard, 
-  onEditColumn, 
   onDeleteColumn,
   onEditCard,
   onDeleteCard,
-  onMoveCard 
+  onMoveCard,
+  onColumnSettings
 }) => {
   const {
     attributes,
@@ -58,22 +58,32 @@ const Column: React.FC<ColumnProps> = ({
       {...attributes}
     >
       {/* Column Header */}
-      <div className="p-4 border-b border-gray-200 bg-white rounded-t-lg">
+      <div 
+        className="p-4 border-b border-gray-200 bg-white rounded-t-lg"
+        style={{ borderTopColor: column.color, borderTopWidth: '3px' }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-800 text-sm">{column.name}</h3>
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: column.color }}
+              />
+              <h3 className="font-semibold text-gray-800 text-sm">{column.name}</h3>
+            </div>
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
               {columnCards.length}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => onEditColumn(column)}
+              onClick={() => onColumnSettings?.(column)}
               className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              title="Edit column"
+              title="Column settings"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </button>
             <button
