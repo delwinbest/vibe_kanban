@@ -32,9 +32,15 @@ export function useRealtimeSubscriptions(boardId: string) {
     // Cleanup function
     return () => {
       console.log('Cleaning up real-time subscriptions for board:', boardId);
-      dispatch(unsubscribeFromBoardChanges(boardId));
-      dispatch(unsubscribeFromColumnChanges(boardId));
-      dispatch(unsubscribeFromCardChanges(boardId));
+      
+      try {
+        dispatch(unsubscribeFromBoardChanges(boardId));
+        dispatch(unsubscribeFromColumnChanges(boardId));
+        dispatch(unsubscribeFromCardChanges(boardId));
+        console.log('✅ Successfully cleaned up subscriptions');
+      } catch (error) {
+        console.warn('⚠️ Error during subscription cleanup:', error);
+      }
     };
   }, [dispatch, boardId]);
 

@@ -18,7 +18,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   realtime: {
     params: {
       eventsPerSecond: 10
-    }
+    },
+    heartbeatIntervalMs: 30000,
+    reconnectAfterMs: (tries: number) => Math.min(tries * 1000, 5000),
   }
 });
 
@@ -69,43 +71,12 @@ export const subscribeToColumns = (boardId: string, callback: (payload: any) => 
 };
 
 export const subscribeToCards = (boardId: string, callback: (payload: any) => void) => {
-  console.log('🔧 SUPABASE: Creating subscription with board filter', {
+  console.log('🔧 SUPABASE: Creating subscription', {
     board_id: boardId,
     channel: `cards_changes_${boardId}`,
-    filter: `column_id=in.(select id from columns where board_id=eq.${boardId})`,
     timestamp: new Date().toISOString()
   });
   
-  // Test: Also create a broad subscription without filter to see if any events are received
-  const testChannel = supabase
-    .channel(`test_cards_all_${boardId}`)
-    .on('postgres_changes', 
-      { 
-        event: '*', 
-        schema: 'public', 
-        table: TABLES.CARDS
-      },
-      (payload) => {
-        console.log('🔧 SUPABASE: TEST - Raw subscription event (no filter)', {
-          channel: `test_cards_all_${boardId}`,
-          event_type: payload.eventType,
-          card_id: (payload.new as any)?.id || (payload.old as any)?.id,
-          column_id: (payload.new as any)?.column_id || (payload.old as any)?.column_id,
-          callback_data: payload
-        });
-        
-        // ALSO dispatch from test channel since filtered channel isn't working
-        console.log('🔧 SUPABASE: TEST - Dispatching from unfiltered channel due to filter channel failure');
-        callback(payload);
-      }
-    )
-    .subscribe((status) => {
-      console.log('🔧 SUPABASE: TEST channel status', {
-        channel: `test_cards_all_${boardId}`,
-        status: status,
-        timestamp: new Date().toISOString()
-      });
-    });
   
   const channel = supabase
     .channel(`cards_changes_${boardId}`)
@@ -144,10 +115,19 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
         status: status,
         timestamp: new Date().toISOString()
       });
+      
+      // Handle problematic statuses gracefully
+      if (status === 'TIMED_OUT' || status === 'CLOSED') {
+        console.warn('🔧 SUPABASE: Main channel issue detected', {
+          channel: `cards_changes_${boardId}`,
+          status: status,
+          board_id: boardId
+        });
+      }
     });
     
-  // Store test channel for cleanup
-  subscriptionManager.subscribe(`test_cards_all_${boardId}`, testChannel);
+  // Store channel for cleanup
+  subscriptionManager.subscribe(`cards_changes_${boardId}`, channel);
     
   return channel;
 };
@@ -157,6 +137,7 @@ export class SubscriptionManager {
   private subscriptions: Map<string, any> = new Map();
 
   subscribe(key: string, subscription: any) {
+    // Clean up existing subscription first to prevent conflicts
     this.unsubscribe(key);
     this.subscriptions.set(key, subscription);
   }
@@ -164,14 +145,29 @@ export class SubscriptionManager {
   unsubscribe(key: string) {
     const subscription = this.subscriptions.get(key);
     if (subscription) {
-      supabase.removeChannel(subscription);
+      try {
+        supabase.removeChannel(subscription);
+        console.log('🔧 SUBSCRIPTION: Successfully removed channel', { key });
+      } catch (error) {
+        console.warn('🔧 SUBSCRIPTION: Error removing channel', { key, error });
+      }
       this.subscriptions.delete(key);
     }
   }
 
   unsubscribeAll() {
-    this.subscriptions.forEach((subscription) => {
-      supabase.removeChannel(subscription);
+    console.log('🔧 SUBSCRIPTION: Cleaning up all subscriptions', {
+      count: this.subscriptions.size,
+      keys: Array.from(this.subscriptions.keys())
+    });
+    
+    this.subscriptions.forEach((subscription, key) => {
+      try {
+        supabase.removeChannel(subscription);
+        console.log('🔧 SUBSCRIPTION: Removed channel', { key });
+      } catch (error) {
+        console.warn('🔧 SUBSCRIPTION: Error removing channel', { key, error });
+      }
     });
     this.subscriptions.clear();
   }
