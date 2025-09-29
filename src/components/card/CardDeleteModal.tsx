@@ -32,7 +32,6 @@ const CardDeleteModal: React.FC<CardDeleteModalProps> = ({ cardId, cardTitle }) 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Delete Card</h2>
         <p className="text-sm text-gray-600">
           Are you sure you want to delete the card "{cardTitle}"? This action cannot be undone.
         </p>
