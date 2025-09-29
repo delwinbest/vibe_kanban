@@ -5,7 +5,7 @@ import { useRealtimeSubscriptions } from './hooks/useRealtimeSubscriptions';
 import { startDrag, endDrag, setDragOverColumn } from './store/slices/uiSlice';
 import { fetchBoard } from './store/slices/boardSlice';
 import { fetchColumns, reorderColumns, reorderColumnsInDatabase } from './store/slices/columnSlice';
-import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard } from './store/slices/cardSlice';
+import { fetchCards, moveCardBetweenColumns, reorderCardsInColumn, updateCard, moveCard, reorderCards } from './store/slices/cardSlice';
 import Board from './components/board/Board';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -110,17 +110,40 @@ function AppContent() {
           
           if (activeIndex !== newPosition) {
             debugLog.card.reorder(activeCard.id, overColumn.id, activeIndex, newPosition);
+            
+            // Optimistic update
             dispatch(reorderCardsInColumn({
               columnId: overColumn.id,
               fromIndex: activeIndex,
               toIndex: newPosition
             }));
+            
+            // Persist to database
+            const updatedCards = cards
+              .filter(card => card.column_id === overColumn.id)
+              .sort((a, b) => a.position - b.position)
+              .map((card, index) => ({
+                id: card.id,
+                position: index,
+                column_id: card.column_id
+              }));
+            
+            dispatch(reorderCards(updatedCards));
           }
         } else {
           // Different column - move between columns
           const newPosition = cards.filter(card => card.column_id === overColumn.id).length;
           debugLog.card.move(activeCard.id, activeCard.column_id, overColumn.id, newPosition);
+          
+          // Optimistic update
           dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: overColumn.id,
+            newPosition
+          }));
+          
+          // Persist to database
+          dispatch(moveCard({
             cardId: activeCard.id,
             newColumnId: overColumn.id,
             newPosition
@@ -137,16 +160,39 @@ function AppContent() {
           const activeIndex = targetColumnCards.findIndex(card => card.id === activeCard.id);
           if (activeIndex !== targetPosition) {
             debugLog.card.reorder(activeCard.id, targetColumnId, activeIndex, targetPosition);
+            
+            // Optimistic update
             dispatch(reorderCardsInColumn({
               columnId: targetColumnId,
               fromIndex: activeIndex,
               toIndex: targetPosition
             }));
+            
+            // Persist to database
+            const updatedCards = cards
+              .filter(card => card.column_id === targetColumnId)
+              .sort((a, b) => a.position - b.position)
+              .map((card, index) => ({
+                id: card.id,
+                position: index,
+                column_id: card.column_id
+              }));
+            
+            dispatch(reorderCards(updatedCards));
           }
         } else {
           // Different column - move between columns
           debugLog.card.move(activeCard.id, activeCard.column_id, targetColumnId, targetPosition);
+          
+          // Optimistic update
           dispatch(moveCardBetweenColumns({
+            cardId: activeCard.id,
+            newColumnId: targetColumnId,
+            newPosition: targetPosition
+          }));
+          
+          // Persist to database
+          dispatch(moveCard({
             cardId: activeCard.id,
             newColumnId: targetColumnId,
             newPosition: targetPosition

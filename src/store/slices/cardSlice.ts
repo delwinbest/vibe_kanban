@@ -183,6 +183,43 @@ export const moveCard = createAsyncThunk(
   }
 );
 
+export const reorderCards = createAsyncThunk(
+  'cards/reorderCards',
+  async (cards: { id: string; position: number; column_id: string }[]) => {
+    try {
+      console.log('🐛 REORDER CARDS: Starting bulk position update', {
+        cards_count: cards.length,
+        cards: cards.map(c => ({ id: c.id, position: c.position, column_id: c.column_id }))
+      });
+      
+      const updates = cards.map(card => ({
+        id: card.id,
+        position: card.position,
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from(TABLES.CARDS)
+        .upsert(updates, { onConflict: 'id' });
+
+      if (error) {
+        console.error('🐛 REORDER CARDS: Supabase error', error);
+        throw error;
+      }
+      
+      console.log('🐛 REORDER CARDS: Success', {
+        updated_cards: updates.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      return cards;
+    } catch (error) {
+      console.error('🐛 REORDER CARDS: Handle error', error);
+      return handleSupabaseError(error);
+    }
+  }
+);
+
 // Real-time subscription actions
 export const subscribeToCardChanges = createAsyncThunk(
   'cards/subscribeToCardChanges',
@@ -477,6 +514,20 @@ const cardSlice = createSlice({
       .addCase(moveCard.rejected, (state, action) => {
         state.error = action.error.message || 'Failed to move card';
         // TODO: Revert optimistic move on error
+      })
+      // Reorder cards - optimistic update already handled by reorderCardsInColumn reducer
+      .addCase(reorderCards.fulfilled, (_state, action) => {
+        // Success - optimistic update was correct, no additional state changes needed
+        if (Array.isArray(action.payload)) {
+          console.log('📝 REDUX: Reorder cards confirmed by server', action.payload.length);
+        } else {
+          console.log('📝 REDUX: Reorder cards confirmed by server (error case)');
+        }
+      })
+      .addCase(reorderCards.rejected, (state, action) => {
+        state.error = action.error.message || 'Failed to reorder cards';
+        // TODO: Revert optimistic reorder on error
+        console.log('📝 REDUX: Reorder cards failed', action.error.message);
       })
       // Subscribe to card changes
       .addCase(subscribeToCardChanges.fulfilled, (state) => {
