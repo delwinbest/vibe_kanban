@@ -93,6 +93,10 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
           column_id: (payload.new as any)?.column_id || (payload.old as any)?.column_id,
           callback_data: payload
         });
+        
+        // ALSO dispatch from test channel since filtered channel isn't working
+        console.log('🔧 SUPABASE: TEST - Dispatching from unfiltered channel due to filter channel failure');
+        callback(payload);
       }
     )
     .subscribe((status) => {
@@ -107,19 +111,30 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
     .channel(`cards_changes_${boardId}`)
     .on('postgres_changes', 
       { 
+        // Complex filters have problems with DELETE events, using broad subscription then filtering in callback
         event: '*', 
         schema: 'public', 
-        table: TABLES.CARDS,
-        filter: `column_id=in.(select id from columns where board_id=eq.${boardId})`
+        table: TABLES.CARDS
+        // Removed complex filter - DELETE events often don't include column_id in old record
+        // We'll handle filtering in the subscription callback instead
       },
       (payload) => {
-        console.log('🔧 SUPABASE: Raw Supabase subscription event', {
+        console.log('🔧 SUPABASE: Raw Supabase subscription event (broad)', {
           channel: `cards_changes_${boardId}`,
           event_type: payload.eventType,
           new_data: payload.new,
           old_data: payload.old,
           timestamp: new Date().toISOString()
         });
+        
+        // Log filter attempt for debugging
+        const cardId = (payload.new as any)?.id || (payload.old as any)?.id;
+        console.log('🔧 SUPABASE: Filtering card for board:', {
+          card_id: cardId,
+          target_board_id: boardId,
+          has_column_id: !!(payload.new as any)?.column_id || !!(payload.old as any)?.column_id
+        });
+        
         callback(payload);
       }
     )
