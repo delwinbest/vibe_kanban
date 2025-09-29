@@ -156,6 +156,8 @@ export const subscribeToCardChanges = createAsyncThunk(
     const subscription = subscribeToCards(boardId, (payload) => {
       console.log('Card change received:', payload);
       console.log('Subscription channel active for board:', boardId);
+      console.log('Event type:', payload.eventType);
+      console.log('Card ID:', payload.new?.id || payload.old?.id);
       
       switch (payload.eventType) {
         case 'INSERT':

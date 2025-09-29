@@ -75,7 +75,8 @@ export const subscribeToCards = (boardId: string, callback: (payload: any) => vo
       { 
         event: '*', 
         schema: 'public', 
-        table: TABLES.CARDS
+        table: TABLES.CARDS,
+        filter: `column_id=in.(select id from columns where board_id=eq.${boardId})`
       },
       callback
     )
