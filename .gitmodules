@@ -1,0 +1,3 @@
+[submodule ".cursor/rules-shared"]
+	path = .cursor/rules-shared
+	url = https://github.com/delwinbest/cursor-rules.git
