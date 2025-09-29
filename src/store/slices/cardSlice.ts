@@ -155,6 +155,7 @@ export const subscribeToCardChanges = createAsyncThunk(
   async (boardId: string, { dispatch }) => {
     const subscription = subscribeToCards(boardId, (payload) => {
       console.log('Card change received:', payload);
+      console.log('Subscription channel active for board:', boardId);
       
       switch (payload.eventType) {
         case 'INSERT':
@@ -172,10 +173,9 @@ export const subscribeToCardChanges = createAsyncThunk(
           }
           break;
         case 'DELETE':
-          // Delay to allow optimistic delete to process first
-          setTimeout(() => {
-            dispatch(removeCard(payload.old.id));
-          }, 100);
+          // Remove delay - optimistic updates already handle immediate UI feedback
+          // Real-time updates should confirm the deletion immediately
+          dispatch(removeCard(payload.old.id));
           break;
         default:
           break;
@@ -245,7 +245,10 @@ const cardSlice = createSlice({
       }
     },
     removeCard: (state, action: PayloadAction<string>) => {
-      state.cards = state.cards.filter(card => card.id !== action.payload);
+      const existingCard = state.cards.find(card => card.id === action.payload);
+      if (existingCard) {
+        state.cards = state.cards.filter(card => card.id !== action.payload);
+      }
     },
     setSubscribed: (state, action: PayloadAction<boolean>) => {
       state.isSubscribed = action.payload;
