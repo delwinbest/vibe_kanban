@@ -78,309 +78,60 @@ alwaysApply: true
 
 ## GitHub Issue Management
 
-### General Issue and Bug Management
-- If the user identifies an issue and asks you to root cause or fix. Determine if this is a net near feature or bug withing exsting code. 
-- Fixing tests and build failures are not considered bug. 
-- If the issue is indeed a bug, roor cause the problem and based on this, create a GitHub issue. 
-- Associate all fixes, branches and pull requests for this bug with the related GitHub Issue.
+### General Issue and Bug Management (MANDATORY WORKFLOW)
+**CRITICAL: This workflow MUST be followed for ALL bug reports and fixes.**
 
-### Issue Creation
-- **Use clear, descriptive titles**
-- **Include problem statement** with current behavior
-- **Add root cause analysis** when applicable
-- **Provide steps to reproduce** for bugs
-- **Define acceptance criteria** for features
-- **Use appropriate labels**: `bug`, `feature`, `enhancement`, `performance`, etc.
+#### Bug Identification and Classification
+- **When user reports a bug**: STOP all current work immediately
+- **Determine if it's a bug**: 
+  - Bug = Existing functionality that worked before but now fails
+  - NOT a bug = New feature requests, test failures, build failures, or code improvements
+- **If it's a bug**: Follow the mandatory bug workflow below
+- **If it's not a bug**: Treat as feature request or improvement
 
-### Issue Templates
-```markdown
-## 🐛 Problem Statement
-[Clear description of the issue]
+#### Mandatory Bug Workflow (MUST FOLLOW)
+1. **Create GitHub Issue FIRST** (before any code changes):
+   - Use the bug template below
+   - Include root cause analysis
+   - Add steps to reproduce
+   - Define acceptance criteria
+   - Add appropriate labels (`bug`, `priority-high/medium/low`)
 
-## 🔍 Root Cause Analysis
-[Technical analysis of the problem]
-
-## 🎯 Expected Behavior
-[What should happen]
-
-## 🔧 Steps to Remedy
-- [ ] Step 1
-- [ ] Step 2
-- [ ] Step 3
-
-## 🧪 Testing Strategy
-[How to test the fix]
-
-## 📋 Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-```
-
-## Code Review Process
-
-### Pre-Commit Checklist (MANDATORY)
-**ALWAYS run these commands before committing code:**
-```bash
-# 1. Type checking (MUST PASS)
-npm run type-check
-
-# 2. Linting (MUST PASS)
-npm run lint
-
-# 3. Build verification (MUST PASS)
-npm run build
-
-# 4. Only commit if all checks pass
-git add .
-git commit -m "your commit message"
-```
-
-**Type checking failures are BLOCKING issues - do not commit until resolved.**
-
-### Before Submitting PR
-- [ ] **Run linting**: `npm run lint`
-- [ ] **Type checking**: `npm run type-check` (MANDATORY - must pass before commit)
-- [ ] **Test locally**: Verify functionality works
-- [ ] **Update documentation**: README, TODO.md, CHAT_CONTEXT_SUMMARY.md
-- [ ] **Check for breaking changes**
-- [ ] **Ensure CI/CD passes**
-
-### PR Review Checklist
-- [ ] **Code quality**: Follows project conventions
-- [ ] **Performance**: No unnecessary re-renders or API calls
-- [ ] **Security**: No sensitive data exposure
-- [ ] **Testing**: Adequate test coverage
-- [ ] **Documentation**: Clear comments and documentation
-- [ ] **Error handling**: Proper error boundaries and fallbacks
-
-## CI/CD Integration
-
-### GitHub Actions Workflow
-- **CI Pipeline**: Runs on every PR
-  - TypeScript compilation
-  - ESLint checking
-  - Build verification
-- **Deployment Pipeline**: Runs on merge to `main`
-  - Build production assets
-  - Deploy to GitHub Pages
-  - Only triggers on `main` branch pushes
-
-### Environment Management
-- **Development**: Local development with hot reload
-- **Staging**: GitHub Pages deployment from `main`
-- **Production**: Same as staging (static hosting)
-
-## SSH and Authentication
-
-### SSH Key Management
-- **Use SSH keys** for GitHub authentication
-- **Add keys to SSH agent**: `ssh-add ~/.ssh/id_ecdsa`
-- **Check loaded keys**: `ssh-add -l`
-- **Fallback to HTTPS** if SSH fails
-
-### Remote Configuration
-- **Primary remote**: `git@github.com:username/repo.git`
-- **HTTPS fallback**: `https://github.com/username/repo.git`
-- **Switch remotes**: `git remote set-url origin <new-url>`
-
-## Documentation Updates
-
-### Required Documentation Updates
-- **README.md**: Update features, installation, usage
-- **TODO.md**: Mark completed tasks, update current status
-- **CHAT_CONTEXT_SUMMARY.md**: Update project state for future sessions
-- **DEPLOYMENT.md**: Update deployment procedures if changed
-
-### Documentation Standards
-- **Keep documentation current** with code changes
-- **Use clear, concise language**
-- **Include code examples** where helpful
-- **Update version numbers** and dates
-- **Cross-reference related documents**
-
-## Error Handling and Debugging
-
-### Debug Logging
-- **Use debug utility**: `src/utils/debug.ts`
-- **Enable only in development**: `import.meta.env.DEV`
-- **Categorize logs**: card, drag, modal, api, general
-- **Include relevant context** in log messages
-
-### Error Boundaries
-- **Implement error boundaries** for component isolation
-- **Provide user-friendly error messages**
-- **Include development error details**
-- **Add recovery mechanisms** where possible
-
-## Performance Considerations
-
-### React Optimization
-- **Use React.memo** for expensive components
-- **Implement useMemo/useCallback** for expensive calculations
-- **Optimize re-renders** with proper dependency arrays
-- **Use React DevTools Profiler** to identify bottlenecks
-
-### State Management
-- **Implement optimistic updates** for better UX
-- **Use proper Redux patterns** with immutable updates
-- **Minimize state updates** to prevent unnecessary re-renders
-- **Handle loading states** appropriately
-
-## Security Best Practices
-
-### Environment Variables
-- **Never commit sensitive data** to repository
-- **Use .env files** for local development
-- **Use GitHub Secrets** for CI/CD
-- **Validate environment variables** at startup
-
-### Code Security
-- **Sanitize user inputs** before processing
-- **Use proper authentication** for API calls
-- **Implement proper error handling** without exposing internals
-- **Keep dependencies updated** for security patches
-
-## Release Management
-
-### Versioning
-- **Use semantic versioning**: MAJOR.MINOR.PATCH
-- **Update package.json** version numbers
-- **Create git tags** for releases
-- **Document breaking changes** in release notes
-
-### Release Process
-1. **Merge to main** from development
-2. **Run full test suite**
-3. **Update version numbers**
-4. **Create release notes**
-5. **Tag the release**
-6. **Deploy to production**
-7. **Update documentation**
-
-## Troubleshooting Common Issues
-
-### SSH Authentication Issues
-```bash
-# Check SSH agent
-ssh-add -l
-
-# Add key to agent
-ssh-add ~/.ssh/id_ecdsa
-
-# Test GitHub connection
-ssh -T git@github.com
-
-# Switch to HTTPS if needed
-git remote set-url origin https://github.com/username/repo.git
-```
-
-### Merge Conflicts
-```bash
-# Pull latest changes
-git pull origin development
-
-# Resolve conflicts manually
-# Stage resolved files
-git add .
-
-# Complete merge
-git commit -m "resolve: Merge conflicts in file.ts"
-```
-
-### CI/CD Failures
-- **Check TypeScript errors**: `npm run type-check`
-- **Fix linting issues**: `npm run lint`
-- **Verify build process**: `npm run build`
-- **Check environment variables** in GitHub Secrets
-
-## Best Practices Summary
-
-1. **Always work on feature branches** - never commit directly to main
-2. **Write descriptive commit messages** with context
-3. **Create comprehensive PR descriptions** with testing instructions
-4. **Link issues to PRs** for better tracking
-5. **Keep documentation updated** with code changes
-6. **Test thoroughly** before merging
-7. **Use optimistic updates** for better user experience
-8. **Implement proper error handling** and boundaries
-9. **Optimize performance** with React best practices
-10. **Follow security best practices** for sensitive data# GitHub Operations and Development Workflow
-
-## Git Branching Strategy
-
-### Branch Structure
-- **`main`**: Production branch - only for stable, tested code
-- **`development`**: Integration branch - ongoing development work
-- **`feature/*`**: Feature branches for specific functionality
-- **`fix/*`**: Bug fix branches for issues and problems
-
-### Branch Naming Conventions
-- Feature branches: `feature/phase-X-description` (e.g., `feature/phase-5-drag-drop`)
-- Bug fix branches: `fix/issue-description` (e.g., `fix/page-reload-on-card-operations`)
-- Use kebab-case for branch names
-- Include issue numbers when applicable
-
-## Development Workflow
-
-### Starting New Work
-1. **Create feature branch from `development`**:
+2. **Create Fix Branch** (from development):
    ```bash
    git checkout development
    git pull origin development
-   git checkout -b feature/phase-X-description
+   git checkout -b fix/issue-description
    ```
 
-2. **Update TODO.md** to reflect current work and mark tasks as in-progress
-3. **Implement changes** with frequent commits
-4. **Test thoroughly** before creating pull request
+3. **Implement Fix**:
+   - Make code changes
+   - Test thoroughly
+   - Follow pre-commit checklist
 
-### Commit Practices
-- **Use conventional commit messages**:
-  - `feat:` for new features
-  - `fix:` for bug fixes
-  - `refactor:` for code improvements
-  - `docs:` for documentation updates
-  - `style:` for formatting changes
-  - `test:` for test additions
-  - `chore:` for maintenance tasks
+4. **Commit with Issue Reference**:
+   ```bash
+   git commit -m "fix: Brief description of fix
 
-- **Include detailed commit messages**:
-  ```bash
-  git commit -m "fix: Prevent full page reload on card add/remove operations
+   Fixes #X - Detailed description of the bug"
+   ```
 
-  - Implement optimistic updates for card operations (create, update, delete)
-  - Remove loading states during card operations to prevent LoadingSpinner re-render
-  - Add deduplication logic to prevent real-time subscription conflicts
-  - Remove setTimeout delays from modal closing
-  - Add React.memo to Card, Column, and Board components for performance
-  - Only show loading spinner on initial data fetch, not during card operations
+5. **Create PR**:
+   - From fix branch to development
+   - Link to GitHub issue
+   - Include testing instructions
 
-  Fixes #7 - Full page reload on card add/remove instead of reactive updates"
-  ```
+6. **Associate Everything**:
+   - Link PR to issue
+   - Use "Fixes #X" in commit message
+   - Update issue with PR reference
 
-### Pull Request Process
-1. **Create pull request** from feature branch to `development`
-2. **Link to GitHub issues** using `Fixes #X` or `Closes #X`
-3. **Include comprehensive PR description**:
-   - Summary of changes
-   - Related issues
-   - Testing instructions
-   - Before/after comparisons
-   - Code quality notes
-   - Acceptance criteria checklist
-
-4. **Wait for review and approval**
-5. **Merge to `development`** after approval
-6. **Create PR from `development` to `main`** for production deployment
-
-## GitHub Issue Management
-
-### General Issue and Bug Management
-- If the user identifies an issue and asks you to root cause or fix. Determine if this is a net near feature or bug withing exsting code. 
-- Fixing tests and build failures are not considered bug. 
-- If the issue is indeed a bug, roor cause the problem and based on this, create a GitHub issue. 
-- Associate all fixes, branches and pull requests for this bug with the related GitHub Issue.
+#### Enforcement Rules
+- **NEVER fix bugs directly on feature branches**
+- **NEVER commit bug fixes without creating an issue first**
+- **NEVER skip the GitHub issue creation step**
+- **ALWAYS use fix/* branch naming for bug fixes**
+- **ALWAYS link commits and PRs to the GitHub issue**
 
 ### Issue Creation
 - **Use clear, descriptive titles**
@@ -393,26 +144,33 @@ git commit -m "resolve: Merge conflicts in file.ts"
 ### Issue Templates
 ```markdown
 ## 🐛 Problem Statement
-[Clear description of the issue]
+[Clear description of the issue and current broken behavior]
 
 ## 🔍 Root Cause Analysis
-[Technical analysis of the problem]
+[Technical analysis of the problem - what's causing the bug]
 
 ## 🎯 Expected Behavior
-[What should happen]
+[What should happen when the feature works correctly]
 
-## 🔧 Steps to Remedy
-- [ ] Step 1
-- [ ] Step 2
-- [ ] Step 3
+## 📋 Steps to Reproduce
+1. Step 1
+2. Step 2
+3. Step 3
+4. Observe the error/bug
 
 ## 🧪 Testing Strategy
-[How to test the fix]
+[How to test the fix - what to verify]
 
 ## 📋 Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- [ ] Bug is fixed and no longer occurs
+- [ ] Existing functionality still works
+- [ ] No new bugs introduced
+- [ ] Code follows project standards
+
+## 🔗 Related Information
+- **Priority**: High/Medium/Low
+- **Affected Components**: [List components affected]
+- **Browser/Environment**: [If applicable]
 ```
 
 ## Code Review Process
@@ -604,3 +362,403 @@ git commit -m "resolve: Merge conflicts in file.ts"
 8. **Implement proper error handling** and boundaries
 9. **Optimize performance** with React best practices
 10. **Follow security best practices** for sensitive data
+
+## Bug Handling Enforcement
+
+### CRITICAL: Bug Workflow Violations
+**If you violate the bug workflow, you MUST:**
+1. **Acknowledge the violation** immediately
+2. **Stop current work** and follow proper workflow
+3. **Create the missing GitHub issue** with full details
+4. **Move the fix to a proper fix/* branch**
+5. **Re-commit with proper "Fixes #X" message**
+6. **Update all documentation** to reflect the proper process
+
+### Quality Gates
+- **No bug fixes on feature branches** - this is a blocking violation
+- **No commits without GitHub issues** for bugs - this is a blocking violation
+- **All bug fixes must be traceable** through GitHub issues
+- **All PRs must link to issues** they address
+
+### Accountability
+- **Document all workflow violations** in commit messages
+- **Explain why the proper process wasn't followed**
+- **Commit to following the process in future**
+- **Update team on process improvements**# GitHub Operations and Development Workflow
+
+## Git Branching Strategy
+
+### Branch Structure
+- **`main`**: Production branch - only for stable, tested code
+- **`development`**: Integration branch - ongoing development work
+- **`feature/*`**: Feature branches for specific functionality
+- **`fix/*`**: Bug fix branches for issues and problems
+
+### Branch Naming Conventions
+- Feature branches: `feature/phase-X-description` (e.g., `feature/phase-5-drag-drop`)
+- Bug fix branches: `fix/issue-description` (e.g., `fix/page-reload-on-card-operations`)
+- Use kebab-case for branch names
+- Include issue numbers when applicable
+
+## Development Workflow
+
+### Starting New Work
+1. **Create feature branch from `development`**:
+   ```bash
+   git checkout development
+   git pull origin development
+   git checkout -b feature/phase-X-description
+   ```
+
+2. **Update TODO.md** to reflect current work and mark tasks as in-progress
+3. **Implement changes** with frequent commits
+4. **Test thoroughly** before creating pull request
+
+### Commit Practices
+- **Use conventional commit messages**:
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `refactor:` for code improvements
+  - `docs:` for documentation updates
+  - `style:` for formatting changes
+  - `test:` for test additions
+  - `chore:` for maintenance tasks
+
+- **Include detailed commit messages**:
+  ```bash
+  git commit -m "fix: Prevent full page reload on card add/remove operations
+
+  - Implement optimistic updates for card operations (create, update, delete)
+  - Remove loading states during card operations to prevent LoadingSpinner re-render
+  - Add deduplication logic to prevent real-time subscription conflicts
+  - Remove setTimeout delays from modal closing
+  - Add React.memo to Card, Column, and Board components for performance
+  - Only show loading spinner on initial data fetch, not during card operations
+
+  Fixes #7 - Full page reload on card add/remove instead of reactive updates"
+  ```
+
+### Pull Request Process
+1. **Create pull request** from feature branch to `development`
+2. **Link to GitHub issues** using `Fixes #X` or `Closes #X`
+3. **Include comprehensive PR description**:
+   - Summary of changes
+   - Related issues
+   - Testing instructions
+   - Before/after comparisons
+   - Code quality notes
+   - Acceptance criteria checklist
+
+4. **Wait for review and approval**
+5. **Merge to `development`** after approval
+6. **Create PR from `development` to `main`** for production deployment
+
+## GitHub Issue Management
+
+### General Issue and Bug Management (MANDATORY WORKFLOW)
+**CRITICAL: This workflow MUST be followed for ALL bug reports and fixes.**
+
+#### Bug Identification and Classification
+- **When user reports a bug**: STOP all current work immediately
+- **Determine if it's a bug**: 
+  - Bug = Existing functionality that worked before but now fails
+  - NOT a bug = New feature requests, test failures, build failures, or code improvements
+- **If it's a bug**: Follow the mandatory bug workflow below
+- **If it's not a bug**: Treat as feature request or improvement
+
+#### Mandatory Bug Workflow (MUST FOLLOW)
+1. **Create GitHub Issue FIRST** (before any code changes):
+   - Use the bug template below
+   - Include root cause analysis
+   - Add steps to reproduce
+   - Define acceptance criteria
+   - Add appropriate labels (`bug`, `priority-high/medium/low`)
+
+2. **Create Fix Branch** (from development):
+   ```bash
+   git checkout development
+   git pull origin development
+   git checkout -b fix/issue-description
+   ```
+
+3. **Implement Fix**:
+   - Make code changes
+   - Test thoroughly
+   - Follow pre-commit checklist
+
+4. **Commit with Issue Reference**:
+   ```bash
+   git commit -m "fix: Brief description of fix
+
+   Fixes #X - Detailed description of the bug"
+   ```
+
+5. **Create PR**:
+   - From fix branch to development
+   - Link to GitHub issue
+   - Include testing instructions
+
+6. **Associate Everything**:
+   - Link PR to issue
+   - Use "Fixes #X" in commit message
+   - Update issue with PR reference
+
+#### Enforcement Rules
+- **NEVER fix bugs directly on feature branches**
+- **NEVER commit bug fixes without creating an issue first**
+- **NEVER skip the GitHub issue creation step**
+- **ALWAYS use fix/* branch naming for bug fixes**
+- **ALWAYS link commits and PRs to the GitHub issue**
+
+### Issue Creation
+- **Use clear, descriptive titles**
+- **Include problem statement** with current behavior
+- **Add root cause analysis** when applicable
+- **Provide steps to reproduce** for bugs
+- **Define acceptance criteria** for features
+- **Use appropriate labels**: `bug`, `feature`, `enhancement`, `performance`, etc.
+
+### Issue Templates
+```markdown
+## 🐛 Problem Statement
+[Clear description of the issue and current broken behavior]
+
+## 🔍 Root Cause Analysis
+[Technical analysis of the problem - what's causing the bug]
+
+## 🎯 Expected Behavior
+[What should happen when the feature works correctly]
+
+## 📋 Steps to Reproduce
+1. Step 1
+2. Step 2
+3. Step 3
+4. Observe the error/bug
+
+## 🧪 Testing Strategy
+[How to test the fix - what to verify]
+
+## 📋 Acceptance Criteria
+- [ ] Bug is fixed and no longer occurs
+- [ ] Existing functionality still works
+- [ ] No new bugs introduced
+- [ ] Code follows project standards
+
+## 🔗 Related Information
+- **Priority**: High/Medium/Low
+- **Affected Components**: [List components affected]
+- **Browser/Environment**: [If applicable]
+```
+
+## Code Review Process
+
+### Pre-Commit Checklist (MANDATORY)
+**ALWAYS run these commands before committing code:**
+```bash
+# 1. Type checking (MUST PASS)
+npm run type-check
+
+# 2. Linting (MUST PASS)
+npm run lint
+
+# 3. Build verification (MUST PASS)
+npm run build
+
+# 4. Only commit if all checks pass
+git add .
+git commit -m "your commit message"
+```
+
+**Type checking failures are BLOCKING issues - do not commit until resolved.**
+
+### Before Submitting PR
+- [ ] **Run linting**: `npm run lint`
+- [ ] **Type checking**: `npm run type-check` (MANDATORY - must pass before commit)
+- [ ] **Test locally**: Verify functionality works
+- [ ] **Update documentation**: README, TODO.md, CHAT_CONTEXT_SUMMARY.md
+- [ ] **Check for breaking changes**
+- [ ] **Ensure CI/CD passes**
+
+### PR Review Checklist
+- [ ] **Code quality**: Follows project conventions
+- [ ] **Performance**: No unnecessary re-renders or API calls
+- [ ] **Security**: No sensitive data exposure
+- [ ] **Testing**: Adequate test coverage
+- [ ] **Documentation**: Clear comments and documentation
+- [ ] **Error handling**: Proper error boundaries and fallbacks
+
+## CI/CD Integration
+
+### GitHub Actions Workflow
+- **CI Pipeline**: Runs on every PR
+  - TypeScript compilation
+  - ESLint checking
+  - Build verification
+- **Deployment Pipeline**: Runs on merge to `main`
+  - Build production assets
+  - Deploy to GitHub Pages
+  - Only triggers on `main` branch pushes
+
+### Environment Management
+- **Development**: Local development with hot reload
+- **Staging**: GitHub Pages deployment from `main`
+- **Production**: Same as staging (static hosting)
+
+## SSH and Authentication
+
+### SSH Key Management
+- **Use SSH keys** for GitHub authentication
+- **Add keys to SSH agent**: `ssh-add ~/.ssh/id_ecdsa`
+- **Check loaded keys**: `ssh-add -l`
+- **Fallback to HTTPS** if SSH fails
+
+### Remote Configuration
+- **Primary remote**: `git@github.com:username/repo.git`
+- **HTTPS fallback**: `https://github.com/username/repo.git`
+- **Switch remotes**: `git remote set-url origin <new-url>`
+
+## Documentation Updates
+
+### Required Documentation Updates
+- **README.md**: Update features, installation, usage
+- **TODO.md**: Mark completed tasks, update current status
+- **CHAT_CONTEXT_SUMMARY.md**: Update project state for future sessions
+- **DEPLOYMENT.md**: Update deployment procedures if changed
+
+### Documentation Standards
+- **Keep documentation current** with code changes
+- **Use clear, concise language**
+- **Include code examples** where helpful
+- **Update version numbers** and dates
+- **Cross-reference related documents**
+
+## Error Handling and Debugging
+
+### Debug Logging
+- **Use debug utility**: `src/utils/debug.ts`
+- **Enable only in development**: `import.meta.env.DEV`
+- **Categorize logs**: card, drag, modal, api, general
+- **Include relevant context** in log messages
+
+### Error Boundaries
+- **Implement error boundaries** for component isolation
+- **Provide user-friendly error messages**
+- **Include development error details**
+- **Add recovery mechanisms** where possible
+
+## Performance Considerations
+
+### React Optimization
+- **Use React.memo** for expensive components
+- **Implement useMemo/useCallback** for expensive calculations
+- **Optimize re-renders** with proper dependency arrays
+- **Use React DevTools Profiler** to identify bottlenecks
+
+### State Management
+- **Implement optimistic updates** for better UX
+- **Use proper Redux patterns** with immutable updates
+- **Minimize state updates** to prevent unnecessary re-renders
+- **Handle loading states** appropriately
+
+## Security Best Practices
+
+### Environment Variables
+- **Never commit sensitive data** to repository
+- **Use .env files** for local development
+- **Use GitHub Secrets** for CI/CD
+- **Validate environment variables** at startup
+
+### Code Security
+- **Sanitize user inputs** before processing
+- **Use proper authentication** for API calls
+- **Implement proper error handling** without exposing internals
+- **Keep dependencies updated** for security patches
+
+## Release Management
+
+### Versioning
+- **Use semantic versioning**: MAJOR.MINOR.PATCH
+- **Update package.json** version numbers
+- **Create git tags** for releases
+- **Document breaking changes** in release notes
+
+### Release Process
+1. **Merge to main** from development
+2. **Run full test suite**
+3. **Update version numbers**
+4. **Create release notes**
+5. **Tag the release**
+6. **Deploy to production**
+7. **Update documentation**
+
+## Troubleshooting Common Issues
+
+### SSH Authentication Issues
+```bash
+# Check SSH agent
+ssh-add -l
+
+# Add key to agent
+ssh-add ~/.ssh/id_ecdsa
+
+# Test GitHub connection
+ssh -T git@github.com
+
+# Switch to HTTPS if needed
+git remote set-url origin https://github.com/username/repo.git
+```
+
+### Merge Conflicts
+```bash
+# Pull latest changes
+git pull origin development
+
+# Resolve conflicts manually
+# Stage resolved files
+git add .
+
+# Complete merge
+git commit -m "resolve: Merge conflicts in file.ts"
+```
+
+### CI/CD Failures
+- **Check TypeScript errors**: `npm run type-check`
+- **Fix linting issues**: `npm run lint`
+- **Verify build process**: `npm run build`
+- **Check environment variables** in GitHub Secrets
+
+## Best Practices Summary
+
+1. **Always work on feature branches** - never commit directly to main
+2. **Write descriptive commit messages** with context
+3. **Create comprehensive PR descriptions** with testing instructions
+4. **Link issues to PRs** for better tracking
+5. **Keep documentation updated** with code changes
+6. **Test thoroughly** before merging
+7. **Use optimistic updates** for better user experience
+8. **Implement proper error handling** and boundaries
+9. **Optimize performance** with React best practices
+10. **Follow security best practices** for sensitive data
+
+## Bug Handling Enforcement
+
+### CRITICAL: Bug Workflow Violations
+**If you violate the bug workflow, you MUST:**
+1. **Acknowledge the violation** immediately
+2. **Stop current work** and follow proper workflow
+3. **Create the missing GitHub issue** with full details
+4. **Move the fix to a proper fix/* branch**
+5. **Re-commit with proper "Fixes #X" message**
+6. **Update all documentation** to reflect the proper process
+
+### Quality Gates
+- **No bug fixes on feature branches** - this is a blocking violation
+- **No commits without GitHub issues** for bugs - this is a blocking violation
+- **All bug fixes must be traceable** through GitHub issues
+- **All PRs must link to issues** they address
+
+### Accountability
+- **Document all workflow violations** in commit messages
+- **Explain why the proper process wasn't followed**
+- **Commit to following the process in future**
+- **Update team on process improvements**
